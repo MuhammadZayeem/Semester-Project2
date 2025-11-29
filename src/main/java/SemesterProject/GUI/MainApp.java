@@ -24,7 +24,7 @@ public class MainApp extends Application {
     private User currentUser;
 
     // Data Stores
-    private User[] users = new User[10]; // Fixed array per your Admin logic
+    private User[] users = new User[10]; // Fixed array per your
     private InventoryManager inventoryManager;
     private DemandManager demandManager;
     private DashboardManager dashboardManager;
