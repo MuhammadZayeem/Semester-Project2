@@ -13,6 +13,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.util.Callback;
@@ -30,24 +31,18 @@ public class InventoryView extends BorderPane {
 
         this.setPadding(new Insets(20));
 
-        // 1. Header
         Label lblHeader = new Label("Categorized Inventory");
         lblHeader.setFont(Font.font("Arial", FontWeight.BOLD, 22));
         lblHeader.setPadding(new Insets(0, 0, 15, 0));
 
-        // ---------------------------------------------------------
-        // LEVEL 1 TABS: [ Body Parts ] [ Engine Parts ]
-        // ---------------------------------------------------------
+        // --- TABS SETUP ---
         TabPane mainTabs = new TabPane();
         mainTabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
 
         Tab tabBody = new Tab("Body Parts");
         Tab tabEngine = new Tab("Engine Parts");
-        tabEngine.setContent(new Label("Engine Parts Module Placeholder"));
+        tabEngine.setContent(new Label("Engine Parts Placeholder"));
 
-        // ---------------------------------------------------------
-        // LEVEL 2 TABS (Inside Body): [ Glass ] [ Bumper ]
-        // ---------------------------------------------------------
         TabPane bodyTabs = new TabPane();
         bodyTabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
         bodyTabs.setStyle("-fx-tab-min-width: 100px;");
@@ -55,11 +50,13 @@ public class InventoryView extends BorderPane {
         Tab tabGlass = new Tab("Glass");
         Tab tabBumper = new Tab("Bumpers");
 
-        // ---------------------------------------------------------
-        // LEVEL 3 TABS (Inside Glass): [ Front ] [ Rear ] [ Door ] ...
-        // ---------------------------------------------------------
+        // Glass Sub-Tabs
         TabPane glassTabs = new TabPane();
         glassTabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
+
+        // Defined Tabs
+        Tab tabLaminated = new Tab("Front Laminated");
+        tabLaminated.setContent(createTable(FrontLaminatedGlass.class));
 
         Tab tabFrontGlass = new Tab("Front Glass");
         tabFrontGlass.setContent(createTable(FrontGlass.class));
@@ -70,54 +67,39 @@ public class InventoryView extends BorderPane {
         Tab tabDoorGlass = new Tab("Door Glass");
         tabDoorGlass.setContent(createTable(DoorGlass.class));
 
-        Tab tabLaminated = new Tab("Front Laminated");
-        tabLaminated.setContent(createTable(FrontLaminatedGlass.class));
-
-        glassTabs.getTabs().addAll(tabFrontGlass, tabRearGlass, tabDoorGlass, tabLaminated);
+        glassTabs.getTabs().addAll(tabLaminated, tabFrontGlass, tabRearGlass, tabDoorGlass);
         tabGlass.setContent(glassTabs);
 
-        // ---------------------------------------------------------
-        // LEVEL 3 TABS (Inside Bumper): [ Front Bumper ]
-        // ---------------------------------------------------------
+        // Bumper Sub-Tabs
         TabPane bumperTabs = new TabPane();
         bumperTabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
-
         Tab tabFrontBumper = new Tab("Front Bumper");
         tabFrontBumper.setContent(createTable(FrontBumper.class));
-
         bumperTabs.getTabs().add(tabFrontBumper);
         tabBumper.setContent(bumperTabs);
 
-        // Assembly
         bodyTabs.getTabs().addAll(tabGlass, tabBumper);
         tabBody.setContent(bodyTabs);
-
         mainTabs.getTabs().addAll(tabBody, tabEngine);
 
         VBox topLayout = new VBox(10);
         topLayout.getChildren().addAll(lblHeader, mainTabs);
-
         this.setCenter(topLayout);
     }
 
-    /**
-     * Creates the Table with the +/- Buttons AND Row Highlighting
-     */
     private VBox createTable(Class<?> categoryClass) {
         VBox layout = new VBox(10);
         layout.setPadding(new Insets(10, 0, 0, 0));
 
-        // --- Data Setup ---
         ObservableList<Part> masterData = FXCollections.observableArrayList(partList);
         FilteredList<Part> filteredData = new FilteredList<>(masterData, p -> categoryClass.isInstance(p));
 
-        // --- Table View ---
         TableView<Part> table = new TableView<>();
         table.setItems(filteredData);
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         table.setEditable(false);
 
-        // *** NEW: ROW FACTORY FOR LOW STOCK ALERT ***
+        // Row Highlight (Low Stock)
         table.setRowFactory(tv -> new TableRow<Part>() {
             @Override
             protected void updateItem(Part item, boolean empty) {
@@ -125,69 +107,92 @@ public class InventoryView extends BorderPane {
                 if (item == null || empty) {
                     setStyle("");
                 } else {
-                    // Check if Quantity is below Threshold
                     if (item.getQuantity() <= item.getThreshold()) {
-                        // Highlight Red
                         setStyle("-fx-background-color: #ffcccc; -fx-text-background-color: black;");
                     } else {
-                        // Reset to default
                         setStyle("");
                     }
                 }
             }
         });
 
-        // 1. Part Name
+        // --- COLUMNS ---
         TableColumn<Part, String> colName = new TableColumn<>("Name");
-        colName.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getName()));
+        colName.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getName()));
 
-        // 2. Car Model
         TableColumn<Part, String> colModel = new TableColumn<>("Car Model");
-        colModel.setCellValueFactory(data -> {
-            if (data.getValue() instanceof BodyPart) {
-                return new SimpleStringProperty(((BodyPart) data.getValue()).getCarModel());
-            }
+        colModel.setCellValueFactory(d -> {
+            if (d.getValue() instanceof BodyPart) return new SimpleStringProperty(((BodyPart) d.getValue()).getCarModel());
             return new SimpleStringProperty("-");
         });
 
-        // 3. Unit Price
         TableColumn<Part, Number> colPrice = new TableColumn<>("Unit Price");
-        colPrice.setCellValueFactory(data -> {
-            if (data.getValue() instanceof BodyPart) {
-                return new SimpleDoubleProperty(((BodyPart) data.getValue()).getUnitPrice());
-            }
+        colPrice.setCellValueFactory(d -> {
+            if (d.getValue() instanceof BodyPart) return new SimpleDoubleProperty(((BodyPart) d.getValue()).getUnitPrice());
             return new SimpleDoubleProperty(0);
         });
 
-        // 4. Quantity
         TableColumn<Part, Number> colQty = new TableColumn<>("Qty");
-        colQty.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getQuantity()));
+        colQty.setCellValueFactory(d -> new SimpleIntegerProperty(d.getValue().getQuantity()));
 
-        // 5. Total Value
         TableColumn<Part, Number> colTotalVal = new TableColumn<>("Total Value");
-        colTotalVal.setCellValueFactory(data -> {
-            if (data.getValue() instanceof BodyPart) {
-                double price = ((BodyPart) data.getValue()).getUnitPrice();
-                int qty = data.getValue().getQuantity();
-                return new SimpleDoubleProperty(price * qty);
+        colTotalVal.setCellValueFactory(d -> {
+            if (d.getValue() instanceof BodyPart) {
+                double price = ((BodyPart) d.getValue()).getUnitPrice();
+                return new SimpleDoubleProperty(price * d.getValue().getQuantity());
             }
             return new SimpleDoubleProperty(0);
         });
 
-        // 6. Update Stock Column (Buttons)
+        // --- BOTTOM SUMMARY LABELS ---
+
+        // 1. Total Quantity Label
+        Label lblTotalQty = new Label("Total Items: 0");
+        lblTotalQty.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+        lblTotalQty.setTextFill(Color.DARKSLATEGRAY);
+
+        // 2. Total Value Label
+        Label lblGrandTotal = new Label("Total Value: PKR 0.0");
+        lblGrandTotal.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+        lblGrandTotal.setTextFill(Color.DARKBLUE);
+
+        // Container for bottom labels
+        HBox totalContainer = new HBox(20); // 20px spacing
+        totalContainer.setAlignment(Pos.CENTER_RIGHT);
+        totalContainer.setPadding(new Insets(5, 10, 5, 0));
+        totalContainer.getChildren().addAll(lblTotalQty, lblGrandTotal);
+
+        // Initial Calculation
+        updateGrandTotal(filteredData, lblGrandTotal, lblTotalQty);
+
+        // Buttons Column
         TableColumn<Part, Void> colAction = new TableColumn<>("Update Stock");
-        colAction.setCellFactory(createActionCellFactory(table));
+        // Pass both labels so they update on click
+        colAction.setCellFactory(createActionCellFactory(table, filteredData, lblGrandTotal, lblTotalQty));
 
         table.getColumns().addAll(colName, colModel, colPrice, colQty, colTotalVal, colAction);
 
-        layout.getChildren().add(table);
+        layout.getChildren().addAll(table, totalContainer);
         return layout;
     }
 
     /**
-     * Helper to create the cell with [-] and [+] buttons.
+     * Helper to Calculate Sums for visible rows
      */
-    private Callback<TableColumn<Part, Void>, TableCell<Part, Void>> createActionCellFactory(TableView<Part> table) {
+    private void updateGrandTotal(List<Part> items, Label lblTotalVal, Label lblTotalQty) {
+        double totalVal = 0;
+        int totalQty = 0;
+        for (Part p : items) {
+            if (p instanceof BodyPart) {
+                totalVal += ((BodyPart) p).getUnitPrice() * p.getQuantity();
+                totalQty += p.getQuantity();
+            }
+        }
+        lblTotalVal.setText("Total Value: PKR " + totalVal);
+        lblTotalQty.setText("Total Items: " + totalQty);
+    }
+
+    private Callback<TableColumn<Part, Void>, TableCell<Part, Void>> createActionCellFactory(TableView<Part> table, List<Part> currentList, Label totalLabel, Label qtyLabel) {
         return param -> new TableCell<>() {
             private final Button btnDecrease = new Button("-");
             private final Button btnIncrease = new Button("+");
@@ -195,39 +200,37 @@ public class InventoryView extends BorderPane {
 
             {
                 pane.setAlignment(Pos.CENTER);
-
                 btnDecrease.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-min-width: 30px;");
                 btnIncrease.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold; -fx-min-width: 30px;");
 
-                // --- ACTION: DECREASE (SELL) ---
                 btnDecrease.setOnAction(event -> {
                     Part part = getTableView().getItems().get(getIndex());
                     if (part.getQuantity() > 0) {
                         part.setQuantity(part.getQuantity() - 1);
                         salesList.add(new Sale(part, 1));
                         table.refresh();
+                        // UPDATE TOTALS
+                        updateGrandTotal(currentList, totalLabel, qtyLabel);
                     } else {
                         Alert alert = new Alert(Alert.AlertType.WARNING, "Out of Stock!");
                         alert.show();
                     }
                 });
 
-                // --- ACTION: INCREASE (RESTOCK) ---
                 btnIncrease.setOnAction(event -> {
                     Part part = getTableView().getItems().get(getIndex());
                     part.setQuantity(part.getQuantity() + 1);
                     table.refresh();
+                    // UPDATE TOTALS
+                    updateGrandTotal(currentList, totalLabel, qtyLabel);
                 });
             }
 
             @Override
             protected void updateItem(Void item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty) {
-                    setGraphic(null);
-                } else {
-                    setGraphic(pane);
-                }
+                if (empty) setGraphic(null);
+                else setGraphic(pane);
             }
         };
     }

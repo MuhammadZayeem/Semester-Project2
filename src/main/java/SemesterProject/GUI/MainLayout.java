@@ -28,14 +28,13 @@ public class MainLayout extends BorderPane {
     private DemandManager demandManager;
     private DashboardManager dashboardManager;
 
-    // Lists (Shared Data)
+    // Shared Data Lists
     private List<Part> masterPartList;
     private List<Sale> masterSaleList;
 
-    // Views (Cached if needed, or recreated on click)
+    // Views
     private UserManagementView userView;
     private SalesView salesView;
-    // Note: InventoryView is recreated on click to ensure fresh data filtering
 
     public MainLayout(MainApp app, User user,
                       InventoryManager invManager,
@@ -49,15 +48,16 @@ public class MainLayout extends BorderPane {
         this.dashboardManager = dashManager;
         this.masterPartList = masterPartList;
 
-        // CRITICAL: Get the sales list from the dashboard manager
-        // This ensures the Sales Tab and the Dashboard Cards see the same data
+        // CRITICAL: Link the sales list from Dashboard Manager so all tabs stay synced
         this.masterSaleList = dashManager.getSalesList();
 
         // 1. Create Sidebar
         VBox sidebar = createSidebar();
         this.setLeft(sidebar);
 
-        // 2. Default View (Center) - Show the Dashboard Tiles by default
+        // 2. Default View: Show Dashboard Tiles
+        // We update data first to ensure counts are correct on load
+        dashboardManager.updateDashboardData();
         this.setCenter(dashboardManager.getView());
     }
 
@@ -86,34 +86,52 @@ public class MainLayout extends BorderPane {
             this.setCenter(dashboardManager.getView());
         });
 
-        // 2. Inventory Button (Links to InventoryView.java)
+        // 2. Inventory Button
         Button btnInventory = createNavButton("Inventory");
         btnInventory.setOnAction(e -> {
-            // Create the Inventory View, passing the shared lists
-            // This enables the "Sell" button inside InventoryView to work
+            // Create Inventory View with the shared lists
+            // This allows the "Sell" button to work and update the Sales list
             InventoryView invView = new InventoryView(masterPartList, masterSaleList);
             this.setCenter(invView);
         });
 
-        // 3. Sales History Button (Links to SalesView.java)
+        // 3. Sales History Button
         Button btnSales = createNavButton("Sales History");
         btnSales.setOnAction(e -> {
-            // Pass the sales list to view history
+            // View past transactions
             salesView = new SalesView(masterSaleList);
             this.setCenter(salesView);
         });
 
-        // 4. Logout Button
+        // 4. Demand List Button (NEW)
+        Button btnDemand = createNavButton("Demand List");
+        btnDemand.setOnAction(e -> {
+            // 1. Update the demand list based on current inventory levels
+            demandManager.generateAutoDemands(masterPartList);
+
+            // 2. Open the View using the manager
+            DemandView demandView = new DemandView(demandManager);
+            this.setCenter(demandView);
+        });
+
+        // 5. Logout Button
         Button btnLogout = new Button("Logout");
         btnLogout.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white;"); // Red
         btnLogout.setMaxWidth(Double.MAX_VALUE);
         btnLogout.setOnAction(e -> app.showLoginScreen());
 
-        // Add standard elements to Sidebar
-        sidebar.getChildren().addAll(lblTitle, lblUser, new Label(""), btnDashboard, btnInventory, btnSales);
+        // --- ADD BUTTONS TO SIDEBAR ---
+        sidebar.getChildren().addAll(
+                lblTitle,
+                lblUser,
+                new Label(""), // Spacer
+                btnDashboard,
+                btnInventory,
+                btnSales,
+                btnDemand
+        );
 
         // --- ADMIN ONLY BUTTON ---
-        // Only add "Manage Users" if the logged-in user is an Admin
         if (user instanceof Admin) {
             Button btnUsers = createNavButton("Manage Users");
             btnUsers.setStyle("-fx-background-color: #8e44ad; -fx-text-fill: white;"); // Purple
@@ -139,7 +157,7 @@ public class MainLayout extends BorderPane {
         btn.setStyle("-fx-background-color: #34495e; -fx-text-fill: white; -fx-alignment: CENTER_LEFT;");
         btn.setPadding(new Insets(10));
 
-        // Hover effect (optional)
+        // Hover effects
         btn.setOnMouseEntered(e -> btn.setStyle("-fx-background-color: #1abc9c; -fx-text-fill: white; -fx-alignment: CENTER_LEFT;"));
         btn.setOnMouseExited(e -> btn.setStyle("-fx-background-color: #34495e; -fx-text-fill: white; -fx-alignment: CENTER_LEFT;"));
 
