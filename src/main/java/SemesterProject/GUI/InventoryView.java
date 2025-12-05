@@ -1,237 +1,139 @@
 package SemesterProject.GUI;
 
-import SemesterProject.Body.*;
 import SemesterProject.Part;
 import SemesterProject.Sales.Sale;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.control.*;
-import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import javafx.util.Callback;
-
 import java.util.List;
 
-public class InventoryView extends BorderPane {
+public class InventoryView extends VBox {
 
-    private List<Part> partList;
-    private List<Sale> salesList;
+    private TableView<Part> table;
+    private List<Part> masterPartList;
+    private List<Sale> masterSaleList;
 
-    public InventoryView(List<Part> partList, List<Sale> salesList) {
-        this.partList = partList;
-        this.salesList = salesList;
+    private Label lblStatus;
+    private Spinner<Integer> spinnerQuantity;
+    private Button btnSell;
 
+    public InventoryView(List<Part> masterPartList, List<Sale> masterSaleList) {
+        this.masterPartList = masterPartList;
+        this.masterSaleList = masterSaleList;
         this.setPadding(new Insets(20));
+        this.setSpacing(10);
 
-        Label lblHeader = new Label("Categorized Inventory");
+        Label lblHeader = new Label("Inventory Management");
         lblHeader.setFont(Font.font("Arial", FontWeight.BOLD, 22));
-        lblHeader.setPadding(new Insets(0, 0, 15, 0));
 
-        // --- TABS SETUP ---
-        TabPane mainTabs = new TabPane();
-        mainTabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
-
-        Tab tabBody = new Tab("Body Parts");
-        Tab tabEngine = new Tab("Engine Parts");
-        tabEngine.setContent(new Label("Engine Parts Placeholder"));
-
-        TabPane bodyTabs = new TabPane();
-        bodyTabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
-        bodyTabs.setStyle("-fx-tab-min-width: 100px;");
-
-        Tab tabGlass = new Tab("Glass");
-        Tab tabBumper = new Tab("Bumpers");
-
-        // Glass Sub-Tabs
-        TabPane glassTabs = new TabPane();
-        glassTabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
-
-        // Defined Tabs
-        Tab tabLaminated = new Tab("Front Laminated");
-        tabLaminated.setContent(createTable(FrontLaminatedGlass.class));
-
-        Tab tabFrontGlass = new Tab("Front Glass");
-        tabFrontGlass.setContent(createTable(FrontGlass.class));
-
-        Tab tabRearGlass = new Tab("Rear Glass");
-        tabRearGlass.setContent(createTable(RearGlass.class));
-
-        Tab tabDoorGlass = new Tab("Door Glass");
-        tabDoorGlass.setContent(createTable(DoorGlass.class));
-
-        glassTabs.getTabs().addAll(tabLaminated, tabFrontGlass, tabRearGlass, tabDoorGlass);
-        tabGlass.setContent(glassTabs);
-
-        // Bumper Sub-Tabs
-        TabPane bumperTabs = new TabPane();
-        bumperTabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
-        Tab tabFrontBumper = new Tab("Front Bumper");
-        tabFrontBumper.setContent(createTable(FrontBumper.class));
-        bumperTabs.getTabs().add(tabFrontBumper);
-        tabBumper.setContent(bumperTabs);
-
-        bodyTabs.getTabs().addAll(tabGlass, tabBumper);
-        tabBody.setContent(bodyTabs);
-        mainTabs.getTabs().addAll(tabBody, tabEngine);
-
-        VBox topLayout = new VBox(10);
-        topLayout.getChildren().addAll(lblHeader, mainTabs);
-        this.setCenter(topLayout);
-    }
-
-    private VBox createTable(Class<?> categoryClass) {
-        VBox layout = new VBox(10);
-        layout.setPadding(new Insets(10, 0, 0, 0));
-
-        ObservableList<Part> masterData = FXCollections.observableArrayList(partList);
-        FilteredList<Part> filteredData = new FilteredList<>(masterData, p -> categoryClass.isInstance(p));
-
-        TableView<Part> table = new TableView<>();
-        table.setItems(filteredData);
+        table = new TableView<>();
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        table.setEditable(false);
 
-        // Row Highlight (Low Stock)
-        table.setRowFactory(tv -> new TableRow<Part>() {
-            @Override
-            protected void updateItem(Part item, boolean empty) {
-                super.updateItem(item, empty);
-                if (item == null || empty) {
-                    setStyle("");
-                } else {
-                    if (item.getQuantity() <= item.getThreshold()) {
-                        setStyle("-fx-background-color: #ffcccc; -fx-text-background-color: black;");
-                    } else {
-                        setStyle("");
-                    }
-                }
-            }
-        });
-
-        // --- COLUMNS ---
-        TableColumn<Part, String> colName = new TableColumn<>("Name");
-        colName.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getName()));
+        // Columns
+        TableColumn<Part, String> colName = new TableColumn<>("Part Name");
+        colName.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getName()));
 
         TableColumn<Part, String> colModel = new TableColumn<>("Car Model");
-        colModel.setCellValueFactory(d -> {
-            if (d.getValue() instanceof BodyPart) return new SimpleStringProperty(((BodyPart) d.getValue()).getCarModel());
-            return new SimpleStringProperty("-");
-        });
+        colModel.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getCarModel()));
 
-        TableColumn<Part, Number> colPrice = new TableColumn<>("Unit Price");
-        colPrice.setCellValueFactory(d -> {
-            if (d.getValue() instanceof BodyPart) return new SimpleDoubleProperty(((BodyPart) d.getValue()).getUnitPrice());
-            return new SimpleDoubleProperty(0);
-        });
+        TableColumn<Part, String> colStock = new TableColumn<>("Current Stock");
+        colStock.setCellValueFactory(data -> new SimpleStringProperty(String.valueOf(data.getValue().getCurrentStock())));
 
-        TableColumn<Part, Number> colQty = new TableColumn<>("Qty");
-        colQty.setCellValueFactory(d -> new SimpleIntegerProperty(d.getValue().getQuantity()));
+        TableColumn<Part, String> colMin = new TableColumn<>("Min Threshold");
+        colMin.setCellValueFactory(data -> new SimpleStringProperty(String.valueOf(data.getValue().getMinThreshold())));
 
-        TableColumn<Part, Number> colTotalVal = new TableColumn<>("Total Value");
-        colTotalVal.setCellValueFactory(d -> {
-            if (d.getValue() instanceof BodyPart) {
-                double price = ((BodyPart) d.getValue()).getUnitPrice();
-                return new SimpleDoubleProperty(price * d.getValue().getQuantity());
+        TableColumn<Part, String> colPrice = new TableColumn<>("Unit Price");
+        colPrice.setCellValueFactory(data -> new SimpleStringProperty(String.format("$%.2f", data.getValue().getUnitPrice())));
+        colPrice.setStyle("-fx-alignment: CENTER-RIGHT;");
+
+        table.getColumns().addAll(colName, colModel, colStock, colMin, colPrice);
+
+        // Sale Controls
+        lblStatus = new Label();
+        lblStatus.setStyle("-fx-text-fill: red;");
+
+        spinnerQuantity = new Spinner<>(1, 100, 1);
+        spinnerQuantity.setEditable(true);
+        spinnerQuantity.setMaxWidth(80);
+
+        btnSell = new Button("Record Sale");
+        btnSell.setDisable(true); // Initially disabled until a part is selected
+        btnSell.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold;");
+
+        HBox controls = new HBox(15, new Label("Quantity:"), spinnerQuantity, btnSell);
+        controls.setPadding(new Insets(10, 0, 0, 0));
+
+        // --- Event Handling ---
+        table.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            boolean isSelected = newSelection != null;
+            btnSell.setDisable(!isSelected);
+            if (isSelected) {
+                // Set max quantity for spinner based on current stock
+                spinnerQuantity.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, newSelection.getCurrentStock(), 1));
+                lblStatus.setText("");
             }
-            return new SimpleDoubleProperty(0);
         });
 
-        // --- BOTTOM SUMMARY LABELS ---
+        btnSell.setOnAction(e -> handleRecordSale());
 
-        // 1. Total Quantity Label
-        Label lblTotalQty = new Label("Total Items: 0");
-        lblTotalQty.setFont(Font.font("Arial", FontWeight.BOLD, 14));
-        lblTotalQty.setTextFill(Color.DARKSLATEGRAY);
-
-        // 2. Total Value Label
-        Label lblGrandTotal = new Label("Total Value: PKR 0.0");
-        lblGrandTotal.setFont(Font.font("Arial", FontWeight.BOLD, 14));
-        lblGrandTotal.setTextFill(Color.DARKBLUE);
-
-        // Container for bottom labels
-        HBox totalContainer = new HBox(20); // 20px spacing
-        totalContainer.setAlignment(Pos.CENTER_RIGHT);
-        totalContainer.setPadding(new Insets(5, 10, 5, 0));
-        totalContainer.getChildren().addAll(lblTotalQty, lblGrandTotal);
-
-        // Initial Calculation
-        updateGrandTotal(filteredData, lblGrandTotal, lblTotalQty);
-
-        // Buttons Column
-        TableColumn<Part, Void> colAction = new TableColumn<>("Update Stock");
-        // Pass both labels so they update on click
-        colAction.setCellFactory(createActionCellFactory(table, filteredData, lblGrandTotal, lblTotalQty));
-
-        table.getColumns().addAll(colName, colModel, colPrice, colQty, colTotalVal, colAction);
-
-        layout.getChildren().addAll(table, totalContainer);
-        return layout;
+        this.getChildren().addAll(lblHeader, table, controls, lblStatus);
+        refreshTable();
     }
 
-    /**
-     * Helper to Calculate Sums for visible rows
-     */
-    private void updateGrandTotal(List<Part> items, Label lblTotalVal, Label lblTotalQty) {
-        double totalVal = 0;
-        int totalQty = 0;
-        for (Part p : items) {
-            if (p instanceof BodyPart) {
-                totalVal += ((BodyPart) p).getUnitPrice() * p.getQuantity();
-                totalQty += p.getQuantity();
-            }
+    private void handleRecordSale() {
+        Part selectedPart = table.getSelectionModel().getSelectedItem();
+        int quantity = spinnerQuantity.getValue();
+
+        if (selectedPart == null) {
+            lblStatus.setText("Please select a part to sell.");
+            return;
         }
-        lblTotalVal.setText("Total Value: PKR " + totalVal);
-        lblTotalQty.setText("Total Items: " + totalQty);
+
+        if (quantity <= 0 || quantity > selectedPart.getCurrentStock()) {
+            lblStatus.setText("Invalid quantity or stock too low.");
+            // Reset spinner to safe value
+            spinnerQuantity.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, selectedPart.getCurrentStock(), 1));
+            return;
+        }
+
+        try {
+            // 1. Calculate cost
+            double totalCost = selectedPart.getUnitPrice() * quantity;
+
+            // 2. Create Sale object with correct arguments (String, int, double)
+            Sale newSale = new Sale(selectedPart.getName(), quantity, totalCost); // FIX APPLIED HERE
+
+            // 3. Update inventory list (temporarily) and persist stock change (DatabaseManager handles this via MainApp)
+            selectedPart.setCurrentStock(selectedPart.getCurrentStock() - quantity);
+
+            // 4. Add to master sales list (temporarily)
+            masterSaleList.add(newSale);
+
+            // NOTE: In a complete, persistent system, steps 3 and 4 should delegate to InventoryManager,
+            // which handles the database updates (Update Stock & Add Sale Record).
+            // Assuming this delegation happens correctly elsewhere, we update the local view:
+
+            lblStatus.setText(String.format("Sale recorded: %d x %s for $%.2f", quantity, selectedPart.getName(), totalCost));
+            lblStatus.setStyle("-fx-text-fill: green;");
+
+            refreshTable();
+            table.getSelectionModel().clearSelection(); // Clear selection after sale
+
+        } catch (Exception ex) {
+            lblStatus.setText("Error recording sale: " + ex.getMessage());
+            lblStatus.setStyle("-fx-text-fill: red;");
+            ex.printStackTrace();
+        }
     }
 
-    private Callback<TableColumn<Part, Void>, TableCell<Part, Void>> createActionCellFactory(TableView<Part> table, List<Part> currentList, Label totalLabel, Label qtyLabel) {
-        return param -> new TableCell<>() {
-            private final Button btnDecrease = new Button("-");
-            private final Button btnIncrease = new Button("+");
-            private final HBox pane = new HBox(10, btnDecrease, btnIncrease);
-
-            {
-                pane.setAlignment(Pos.CENTER);
-                btnDecrease.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-min-width: 30px;");
-                btnIncrease.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold; -fx-min-width: 30px;");
-
-                btnDecrease.setOnAction(event -> {
-                    Part part = getTableView().getItems().get(getIndex());
-                    if (part.getQuantity() > 0) {
-                        part.setQuantity(part.getQuantity() - 1);
-                        salesList.add(new Sale(part, 1));
-                        table.refresh();
-                        // UPDATE TOTALS
-                        updateGrandTotal(currentList, totalLabel, qtyLabel);
-                    } else {
-                        Alert alert = new Alert(Alert.AlertType.WARNING, "Out of Stock!");
-                        alert.show();
-                    }
-                });
-
-                btnIncrease.setOnAction(event -> {
-                    Part part = getTableView().getItems().get(getIndex());
-                    part.setQuantity(part.getQuantity() + 1);
-                    table.refresh();
-                    // UPDATE TOTALS
-                    updateGrandTotal(currentList, totalLabel, qtyLabel);
-                });
-            }
-
-            @Override
-            protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty) setGraphic(null);
-                else setGraphic(pane);
-            }
-        };
+    public void refreshTable() {
+        ObservableList<Part> data = FXCollections.observableArrayList(masterPartList);
+        table.setItems(data);
     }
 }

@@ -4,10 +4,7 @@ import SemesterProject.Supplier.LocalSupplier;
 import SemesterProject.Supplier.Supplier;
 
 public abstract class Bumper extends BodyPart {
-
-    public Bumper(String name,String carChasis,int quantity,int threshold,double price){
-        super(name,carChasis,quantity,threshold,price,ABDUllah);
+    public Bumper(String partId, String name, String carChasis, int quantity, int threshold, double price, Supplier supplier){
+        super(partId, name, carChasis, quantity, threshold, price, supplier);
     }
-    static Supplier ABDUllah=new LocalSupplier("ABDULLAH","()*)(&)(&","@","LAHORE","BUMPERS");
-
 }

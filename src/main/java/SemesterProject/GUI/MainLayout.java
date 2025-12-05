@@ -35,6 +35,7 @@ public class MainLayout extends BorderPane {
     // Views
     private UserManagementView userView;
     private SalesView salesView;
+    private CategorizedInventoryView categorizedInventoryView; // Reference to the new Inventory View
 
     public MainLayout(MainApp app, User user,
                       InventoryManager invManager,
@@ -48,15 +49,18 @@ public class MainLayout extends BorderPane {
         this.dashboardManager = dashManager;
         this.masterPartList = masterPartList;
 
-        // CRITICAL: Link the sales list from Dashboard Manager so all tabs stay synced
+        // Link the sales list from Dashboard Manager
         this.masterSaleList = dashManager.getSalesList();
+
+        // FIX 1: Initialize CategorizedInventoryView here, passing the essential this.app reference.
+        this.categorizedInventoryView = new CategorizedInventoryView(masterPartList, this.app);
+
 
         // 1. Create Sidebar
         VBox sidebar = createSidebar();
         this.setLeft(sidebar);
 
         // 2. Default View: Show Dashboard Tiles
-        // We update data first to ensure counts are correct on load
         dashboardManager.updateDashboardData();
         this.setCenter(dashboardManager.getView());
     }
@@ -86,13 +90,12 @@ public class MainLayout extends BorderPane {
             this.setCenter(dashboardManager.getView());
         });
 
-        // 2. Inventory Button
+        // 2. Inventory Button (Now shows CategorizedInventoryView)
         Button btnInventory = createNavButton("Inventory");
         btnInventory.setOnAction(e -> {
-            // Create Inventory View with the shared lists
-            // This allows the "Sell" button to work and update the Sales list
-            InventoryView invView = new InventoryView(masterPartList, masterSaleList);
-            this.setCenter(invView);
+            // FIX 2: Call refresh and set the center. No need to re-instantiate.
+            categorizedInventoryView.refreshTable(); // Force reload data
+            this.setCenter(categorizedInventoryView);
         });
 
         // 3. Sales History Button
@@ -136,8 +139,9 @@ public class MainLayout extends BorderPane {
             Button btnUsers = createNavButton("Manage Users");
             btnUsers.setStyle("-fx-background-color: #8e44ad; -fx-text-fill: white;"); // Purple
             btnUsers.setOnAction(e -> {
-                if (userView == null) userView = new UserManagementView(app.getUsers());
-                userView.refreshTable();
+                if (userView == null) userView = new UserManagementView(this.app, this.user);
+                userView.refreshUserTable();
+                userView.refreshResetTable();
                 this.setCenter(userView);
             });
             sidebar.getChildren().add(btnUsers);
@@ -154,12 +158,12 @@ public class MainLayout extends BorderPane {
     private Button createNavButton(String text) {
         Button btn = new Button(text);
         btn.setMaxWidth(Double.MAX_VALUE);
-        btn.setStyle("-fx-background-color: #34495e; -fx-text-fill: white; -fx-alignment: CENTER_LEFT;");
+        btn.setStyle("-fx-background-color: #34495e; -fx-text-fill: white; -fx-alignment: CENTER-LEFT;");
         btn.setPadding(new Insets(10));
 
         // Hover effects
-        btn.setOnMouseEntered(e -> btn.setStyle("-fx-background-color: #1abc9c; -fx-text-fill: white; -fx-alignment: CENTER_LEFT;"));
-        btn.setOnMouseExited(e -> btn.setStyle("-fx-background-color: #34495e; -fx-text-fill: white; -fx-alignment: CENTER_LEFT;"));
+        btn.setOnMouseEntered(e -> btn.setStyle("-fx-background-color: #1abc9c; -fx-text-fill: white; -fx-alignment: CENTER-LEFT;"));
+        btn.setOnMouseExited(e -> btn.setStyle("-fx-background-color: #34495e; -fx-text-fill: white; -fx-alignment: CENTER-LEFT;"));
 
         return btn;
     }

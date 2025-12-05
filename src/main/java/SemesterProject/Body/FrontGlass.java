@@ -1,18 +1,8 @@
 package SemesterProject.Body;
-
+import SemesterProject.Supplier.Supplier;
 public class FrontGlass extends Glass {
-
-    public FrontGlass(String chasisModel, int quantity, int threshold, double unitPrice) {
-
-        super("FG", chasisModel, quantity, threshold, unitPrice);
+    public FrontGlass(String partId, String name, String carModel, int currentStock, int minThreshold, double unitPrice, Supplier supplier) {
+        super(partId, name, carModel, currentStock, minThreshold, unitPrice, supplier);
     }
-    @Override
-    public void displayDetails() {
-        System.out.println("-------- FRONT SCREEN DETAILS --------");
-        System.out.println("Car Model: " + getCarModel());
-        System.out.println("Quantity: " + getQuantity());
-        System.out.println("Unit Price: " + getUnitPrice());
-        System.out.println("--------------------------------------");
-
-    }
+    @Override public void displayDetails() {}
 }

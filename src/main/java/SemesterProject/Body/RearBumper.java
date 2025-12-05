@@ -1,7 +1,7 @@
 package SemesterProject.Body;
 import SemesterProject.Supplier.Supplier;
-public class DoorGlass extends Glass {
-    public DoorGlass(String partId, String name, String carModel, int currentStock, int minThreshold, double unitPrice, Supplier supplier) {
+public class RearBumper extends Bumper {
+    public RearBumper(String partId, String name, String carModel, int currentStock, int minThreshold, double unitPrice, Supplier supplier) {
         super(partId, name, carModel, currentStock, minThreshold, unitPrice, supplier);
     }
     @Override public void displayDetails() {}

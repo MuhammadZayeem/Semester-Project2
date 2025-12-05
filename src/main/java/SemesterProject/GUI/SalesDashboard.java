@@ -2,8 +2,10 @@ package SemesterProject.GUI;
 
 import SemesterProject.Body.FrontGlass; // Importing your specific classes
 import SemesterProject.Body.FrontLaminatedGlass;
-import SemesterProject.Body.BodyPart;
+import SemesterProject.Body.BodyPart; // Note: Assuming BodyPart is the base Part class
 import SemesterProject.Sales.Sale;
+import SemesterProject.Part; // Import the base Part class
+
 import javafx.application.Application;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -23,6 +25,8 @@ import javafx.stage.Stage;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class SalesDashboard extends Application {
 
@@ -86,32 +90,27 @@ public class SalesDashboard extends Application {
         table.setItems(salesData);
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-        // Column 1: Time
+        // FIX 1: Replaced getFormattedTime() with the correct database-friendly method
         TableColumn<Sale, String> colTime = new TableColumn<>("Time");
-        colTime.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getFormattedTime()));
+        colTime.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getFormattedSaleDate()));
 
-        // Column 2: Part Name (Extracting from the nested Part object)
+        // FIX 2 & 3: Part Name and Car Model extraction
+        // Note: Sale only stores Part Name (String), not the full Part object.
         TableColumn<Sale, String> colName = new TableColumn<>("Part Name");
-        colName.setCellValueFactory(cell -> {
-            // Safe casting to BodyPart to access getName() if Part doesn't have it exposed directly
-            BodyPart part = (BodyPart) cell.getValue().getPart();
-            return new SimpleStringProperty(part.getName());
-        });
+        colName.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getPartName())); // Use getPartName()
 
-        // Column 3: Car Model
+        // We can no longer get Car Model directly from Sale, as Sale only holds the part name.
+        // For a mock, we display the part name again or leave this column simplified.
         TableColumn<Sale, String> colModel = new TableColumn<>("Car Model");
-        colModel.setCellValueFactory(cell -> {
-            BodyPart part = (BodyPart) cell.getValue().getPart();
-            return new SimpleStringProperty(part.getCarModel());
-        });
+        colModel.setCellValueFactory(cell -> new SimpleStringProperty("N/A (Stored in DB)")); // Simplified for the mock data structure
 
-        // Column 4: Quantity
+        // FIX 4: Replaced getQuantityUsed() with getQuantitySold()
         TableColumn<Sale, Number> colQty = new TableColumn<>("Qty");
-        colQty.setCellValueFactory(cell -> new SimpleIntegerProperty(cell.getValue().getQuantityUsed()));
+        colQty.setCellValueFactory(cell -> new SimpleIntegerProperty(cell.getValue().getQuantitySold())); // Use getQuantitySold()
 
-        // Column 5: Total Amount
+        // FIX 5: Replaced getTotalAmount() with getCost()
         TableColumn<Sale, Number> colTotal = new TableColumn<>("Total (PKR)");
-        colTotal.setCellValueFactory(cell -> new SimpleDoubleProperty(cell.getValue().getTotalAmount()));
+        colTotal.setCellValueFactory(cell -> new SimpleDoubleProperty(cell.getValue().getCost())); // Use getCost()
 
         table.getColumns().addAll(colTime, colName, colModel, colQty, colTotal);
         return table;
@@ -151,32 +150,50 @@ public class SalesDashboard extends Application {
         int totalQty = 0;
 
         for (Sale s : salesData) {
-            totalRev += s.getTotalAmount();
-            totalQty += s.getQuantityUsed();
+            // FIX: Replaced obsolete methods with getCost() and getQuantitySold()
+            totalRev += s.getCost();
+            totalQty += s.getQuantitySold();
         }
 
-        lblTotalRevenueVal.setText("PKR " + totalRev);
+        lblTotalRevenueVal.setText("PKR " + String.format("%.2f", totalRev));
         lblTotalSoldVal.setText(String.valueOf(totalQty));
 
-        // Simple logic to just show the first item as top seller for this example
+        // Logic to determine top seller
         if (!salesData.isEmpty()) {
-            BodyPart p = (BodyPart) salesData.get(0).getPart();
-            lblTopItemVal.setText(p.getName());
+            String topSellerName = salesData.stream()
+                    .collect(Collectors.groupingBy(Sale::getPartName, Collectors.summingInt(Sale::getQuantitySold)))
+                    .entrySet().stream()
+                    .max(Map.Entry.comparingByValue())
+                    .map(Map.Entry::getKey)
+                    .orElse("-");
+
+            lblTopItemVal.setText(topSellerName);
+        } else {
+            lblTopItemVal.setText("-");
         }
     }
 
     // --- Mock Data ---
     private void generateMockData() {
-        // Using your actual classes
+        // FIX 6: Constructor Mismatch Fix
+        // We must create sales using the constructor Sale(String partName, int quantitySold, double cost)
 
         // Sale 1: Front Glass for Civic
-        FrontGlass p1 = new FrontGlass("Civic", 10, 5, 5000);
-        Sale s1 = new Sale(p1, 2); // Sold 2
+        String p1Name = "Civic Front Glass";
+        double p1Price = 5000.0;
+        int q1 = 2;
+        Sale s1 = new Sale(p1Name, q1, p1Price * q1);
 
         // Sale 2: Front Laminated for Corolla
-        FrontLaminatedGlass p2 = new FrontLaminatedGlass("Corolla", 20, 5, 12000);
-        Sale s2 = new Sale(p2, 1); // Sold 1
+        String p2Name = "Corolla Front Laminated";
+        double p2Price = 12000.0;
+        int q2 = 1;
+        Sale s2 = new Sale(p2Name, q2, p2Price * q2);
 
-        salesData.addAll(s1, s2);
+        // Sale 3: To make p1 the top seller
+        Sale s3 = new Sale(p1Name, 5, p1Price * 5);
+
+
+        salesData.addAll(s1, s2, s3);
     }
 }

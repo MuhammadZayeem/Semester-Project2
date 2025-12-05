@@ -1,9 +1,6 @@
 package SemesterProject.GUI;
 
-import SemesterProject.Body.BodyPart;
 import SemesterProject.Sales.Sale;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -19,54 +16,52 @@ import java.util.List;
 
 public class SalesView extends VBox {
 
-    public SalesView(List<Sale> salesList) {
+    private TableView<Sale> table;
+    private List<Sale> masterSaleList;
+
+    public SalesView(List<Sale> masterSaleList) {
+        this.masterSaleList = masterSaleList;
         this.setPadding(new Insets(20));
         this.setSpacing(10);
+        this.setStyle("-fx-background-color: #f4f4f4;");
 
-        // Header
-        Label lblHeader = new Label("Sales Transaction History");
+        Label lblHeader = new Label("Sales History & Transactions");
         lblHeader.setFont(Font.font("Arial", FontWeight.BOLD, 22));
+        lblHeader.setStyle("-fx-text-fill: #2c3e50;");
 
-        // Create Table
-        TableView<Sale> table = new TableView<>();
-
-        // 1. Date Column (FIXED: Uses getTimestamp().toLocalDate())
-        TableColumn<Sale, String> colDate = new TableColumn<>("Date");
-        colDate.setCellValueFactory(data -> new SimpleStringProperty(
-                data.getValue().getTimestamp().toLocalDate().toString()
-        ));
-
-        // 2. Time Column (Added this so you can see the time too)
-        TableColumn<Sale, String> colTime = new TableColumn<>("Time");
-        colTime.setCellValueFactory(data -> new SimpleStringProperty(
-                data.getValue().getFormattedTime()
-        ));
-
-        // 3. Part Name Column
-        TableColumn<Sale, String> colPart = new TableColumn<>("Part Name");
-        colPart.setCellValueFactory(data -> new SimpleStringProperty(
-                data.getValue().getPart().getName()
-        ));
-
-        // 4. Quantity Column
-        TableColumn<Sale, Number> colQty = new TableColumn<>("Qty Sold");
-        colQty.setCellValueFactory(data -> new SimpleIntegerProperty(
-                data.getValue().getQuantityUsed()
-        ));
-
-        // 5. Total Revenue Column (Calculated)
-        TableColumn<Sale, Number> colTotal = new TableColumn<>("Total Amount");
-        colTotal.setCellValueFactory(data -> new SimpleDoubleProperty(
-                data.getValue().getTotalAmount()
-        ));
-
-        table.getColumns().addAll(colDate, colTime, colPart, colQty, colTotal);
+        table = new TableView<>();
+        table.setEditable(false);
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-        // Load Data
-        ObservableList<Sale> data = FXCollections.observableArrayList(salesList);
-        table.setItems(data);
+        // Columns
+
+        // FIX: Replaced getTimestamp() with getFormattedSaleDate()
+        TableColumn<Sale, String> colDate = new TableColumn<>("Date & Time");
+        colDate.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getFormattedSaleDate()));
+        colDate.setPrefWidth(200);
+
+        // FIX: Replaced getPart() with getPartName()
+        TableColumn<Sale, String> colPart = new TableColumn<>("Part Name");
+        colPart.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getPartName()));
+
+        // FIX: Replaced getQuantityUsed() with getQuantitySold()
+        TableColumn<Sale, String> colQuantity = new TableColumn<>("Quantity Sold");
+        colQuantity.setCellValueFactory(data -> new SimpleStringProperty(String.valueOf(data.getValue().getQuantitySold())));
+        colQuantity.setStyle("-fx-alignment: CENTER;");
+
+        // FIX: Replaced getTotalAmount() with getCost() and formatted as currency
+        TableColumn<Sale, String> colCost = new TableColumn<>("Total Cost");
+        colCost.setCellValueFactory(data -> new SimpleStringProperty(String.format("$%.2f", data.getValue().getCost())));
+        colCost.setStyle("-fx-alignment: CENTER-RIGHT; -fx-font-weight: bold;");
+
+        table.getColumns().addAll(colDate, colPart, colQuantity, colCost);
 
         this.getChildren().addAll(lblHeader, table);
+        refreshTable();
+    }
+
+    public void refreshTable() {
+        ObservableList<Sale> data = FXCollections.observableArrayList(masterSaleList);
+        table.setItems(data);
     }
 }

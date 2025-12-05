@@ -1,13 +1,8 @@
 package SemesterProject.Body;
-
-public class FrontBumper extends Bumper{
-
-    public FrontBumper(String name,String carChasis,int quantity,int threshold,double price){
-        super(name, carChasis, quantity, threshold, price);
+import SemesterProject.Supplier.Supplier;
+public class FrontBumper extends Bumper {
+    public FrontBumper(String partId, String name, String carModel, int currentStock, int minThreshold, double unitPrice, Supplier supplier) {
+        super(partId, name, carModel, currentStock, minThreshold, unitPrice, supplier);
     }
-
-    @Override
-    public void displayDetails() {
-
-    }
+    @Override public void displayDetails() {}
 }

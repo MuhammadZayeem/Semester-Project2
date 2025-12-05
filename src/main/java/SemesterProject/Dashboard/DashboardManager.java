@@ -3,150 +3,158 @@ package SemesterProject.Dashboard;
 import SemesterProject.Demand.DemandManager;
 import SemesterProject.Part;
 import SemesterProject.Sales.Sale;
-import SemesterProject.Supplier.Supplier;
-
-// --- FIX 1: ADD THESE IMPORTS ---
 import javafx.geometry.Insets;
-import javafx.scene.Node;
+import javafx.geometry.Pos;
 import javafx.scene.control.Label;
-import javafx.scene.layout.GridPane; // Used to arrange cards
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
-import java.time.LocalDate;
-import java.util.*;
 
 public class DashboardManager {
 
-    private List<Part> parts;
-    private List<Sale> sales;
+    private List<Part> masterPartList;
+    private List<Sale> masterSaleList;
     private DemandManager demandManager;
+    private VBox dashboardView;
 
-    // Define the Labels globally so we can update them dynamically
-    private Label lblTotalRevenue = new Label("PKR 0");
-    private Label lblTotalParts = new Label("0");
-    private Label lblLowStock = new Label("0");
-    private Label lblTodayUsage = new Label("0");
+    // Dashboard Data Fields
+    private int totalStockQuantity; // Total sum of all quantities (Total Parts)
+    private int lowStockItems;
+    private int partsUsedToday; // NEW METRIC: Parts Sold/Used Today
+    private int pendingDemandsCount; // NEW METRIC: Placeholder for pending demand count
 
-    public DashboardManager(List<Part> parts, List<Sale> sales, DemandManager demandManager) {
-        this.parts = parts;
-        this.sales = sales;
+    // Label references
+    private Label dataLabelTotalStockQuantity;
+    private Label dataLabelLowStock;
+    private Label dataLabelPartsUsedToday;
+    private Label dataLabelPendingDemands;
+
+    public DashboardManager(List<Part> masterPartList, List<Sale> masterSaleList, DemandManager demandManager) {
+        this.masterPartList = masterPartList;
+        this.masterSaleList = masterSaleList;
         this.demandManager = demandManager;
+        this.dashboardView = createDashboardLayout(); // Initializes the UI
     }
 
-    // ------------------------------------------
-    //  1. The Main UI Method (Call this in MainLayout)
-    // ------------------------------------------
-    public Node getView() {
-        // Create a Grid to hold the cards
-        GridPane grid = new GridPane();
-        grid.setHgap(20);
-        grid.setVgap(20);
-        grid.setPadding(new Insets(20));
-
-        // Create the Cards
-        Node cardRevenue = createRevenueCard(); // Purple
-        Node cardParts   = createInfoCard("Total Parts", lblTotalParts, "#3498db"); // Blue
-        Node cardStock   = createInfoCard("Low Stock", lblLowStock, "#e74c3c");     // Red
-        Node cardUsage   = createInfoCard("Today's Usage", lblTodayUsage, "#2ecc71"); // Green
-
-        // Add them to the grid (Col, Row)
-        grid.add(cardRevenue, 0, 0);
-        grid.add(cardParts,   1, 0);
-        grid.add(cardStock,   0, 1);
-        grid.add(cardUsage,   1, 1);
-
-        // Update values immediately
-        updateDashboardData();
-
-        return grid;
-    }
-
-    // ------------------------------------------
-    //  2. Logic to Update Values
-    // ------------------------------------------
     public void updateDashboardData() {
-        int totalPartsCount = parts.size();
-        int lowStockCount = 0;
-        int usageCount = 0;
-        double totalRevenue = 0.0;
-        LocalDate today = LocalDate.now();
+        // Recalculate Inventory Metrics
+        totalStockQuantity = masterPartList.stream().mapToInt(Part::getCurrentStock).sum();
+        lowStockItems = (int) masterPartList.stream().filter(p -> p.getCurrentStock() <= p.getMinThreshold()).count();
 
-        // Calculate Stock
-        for (Part p : parts) {
-            if (p.getQuantity() <= p.getThreshold()) {
-                lowStockCount++;
+        // Recalculate Dynamic Metrics
+        calculateUsageMetrics();
+        // Placeholder: Assuming DemandManager tracks pending demands
+        this.pendingDemandsCount = demandManager.getDemandList().size();
+
+        // Update the UI labels
+        updateUI();
+    }
+
+    private void calculateUsageMetrics() {
+        // Calculate parts sold/used today
+        LocalDateTime startOfDay = LocalDateTime.now().truncatedTo(ChronoUnit.DAYS);
+        partsUsedToday = 0;
+
+        for (Sale sale : masterSaleList) {
+            if (sale.getSaleDateTime() != null && sale.getSaleDateTime().isAfter(startOfDay)) {
+                // Sum the quantity sold for today's usage
+                partsUsedToday += sale.getQuantitySold();
             }
         }
-
-        // Calculate Revenue & Usage
-        for (Sale s : sales) {
-            if (s.getTimestamp().toLocalDate().equals(today)) {
-                usageCount += s.getQuantityUsed();
-                totalRevenue += s.getTotalAmount();
-            }
-        }
-
-        // Update UI Labels
-        lblTotalRevenue.setText("PKR " + totalRevenue);
-        lblTotalParts.setText(String.valueOf(totalPartsCount));
-        lblLowStock.setText(String.valueOf(lowStockCount));
-        lblTodayUsage.setText(String.valueOf(usageCount));
     }
 
-    // ------------------------------------------
-    //  3. Card Creation Helpers
-    // ------------------------------------------
+    // --- UI Methods ---
 
-    // The Purple Revenue Card
-    private Node createRevenueCard() {
-        VBox card = new VBox(10);
-        card.setPadding(new Insets(20));
-        card.setPrefSize(220, 120);
-        card.setStyle("-fx-background-color: #8E44AD; -fx-background-radius: 5; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 2);");
+    private VBox createDashboardLayout() {
+        VBox container = new VBox(20);
+        container.setPadding(new Insets(20));
+        container.setStyle("-fx-background-color: #ecf0f1;");
 
-        Label title = new Label("Total Revenue");
-        title.setTextFill(Color.WHITE);
-        title.setFont(Font.font("Arial", 16));
+        Label lblTitle = new Label("System Dashboard"); // Title updated to match image
+        lblTitle.setFont(Font.font("Arial", FontWeight.BOLD, 28));
 
-        lblTotalRevenue.setTextFill(Color.WHITE);
-        lblTotalRevenue.setFont(Font.font("Arial", FontWeight.BOLD, 28));
+        GridPane tileGrid = new GridPane();
+        tileGrid.setHgap(20);
+        tileGrid.setVgap(20);
 
-        card.getChildren().addAll(title, lblTotalRevenue);
-        return card;
+        // Initialize Data Labels (referenced later in updateUI)
+        dataLabelTotalStockQuantity = createDataLabel(String.valueOf(totalStockQuantity));
+        dataLabelLowStock = createDataLabel(String.valueOf(lowStockItems));
+        dataLabelPartsUsedToday = createDataLabel(String.valueOf(partsUsedToday));
+        dataLabelPendingDemands = createDataLabel(String.valueOf(pendingDemandsCount));
+
+
+        // =========================================================
+        // 4-TILE LAYOUT (Matching Image)
+        // =========================================================
+
+        // 1. Total Parts (Total Stock Quantity)
+        tileGrid.add(createTile("Total Parts", dataLabelTotalStockQuantity, "#3498db"), 0, 0);
+
+        // 2. Low Stock Items
+        tileGrid.add(createTile("Low Stock", dataLabelLowStock, "#e74c3c"), 1, 0);
+
+        // 3. Today's Usage
+        tileGrid.add(createTile("Today's Usage", dataLabelPartsUsedToday, "#2ecc71"), 0, 1);
+
+        // 4. Pending Demands
+        tileGrid.add(createTile("Pending Demands", dataLabelPendingDemands, "#f39c12"), 1, 1);
+
+
+        container.getChildren().addAll(lblTitle, tileGrid);
+
+        return container;
     }
 
-    // Generic Helper for Blue/Red/Green Cards
-    private Node createInfoCard(String titleText, Label valueLabel, String hexColor) {
-        VBox card = new VBox(10);
-        card.setPadding(new Insets(20));
-        card.setPrefSize(220, 120);
-        card.setStyle("-fx-background-color: " + hexColor + "; -fx-background-radius: 5; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 2);");
-
-        Label title = new Label(titleText);
-        title.setTextFill(Color.WHITE);
-        title.setFont(Font.font("Arial", 16));
-
-        valueLabel.setTextFill(Color.WHITE);
-        valueLabel.setFont(Font.font("Arial", FontWeight.BOLD, 30));
-
-        card.getChildren().addAll(title, valueLabel);
-        return card;
+    private void updateUI() {
+        // Update the specific Label references directly.
+        dataLabelTotalStockQuantity.setText(String.valueOf(totalStockQuantity));
+        dataLabelLowStock.setText(String.valueOf(lowStockItems));
+        dataLabelPartsUsedToday.setText(String.valueOf(partsUsedToday));
+        dataLabelPendingDemands.setText(String.valueOf(pendingDemandsCount));
     }
 
-    // ------------------------------------------
-    //  4. Getters & Console Logic
-    // ------------------------------------------
+    // Simplified createTile to match the image's simple style
+    private VBox createTile(String title, Label dataLabel, String color) {
+        VBox tile = new VBox(5);
+        tile.setAlignment(Pos.CENTER);
+        tile.setPadding(new Insets(15));
+        tile.setPrefSize(180, 100); // Smaller size to fit 4 tiles better
 
-    // FIX 2: Corrected the variable name here (sales -> sales)
+        // Apply styling for background and shadow
+        tile.setStyle("-fx-background-color: " + color + "; -fx-border-radius: 10; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 5);");
+
+        Label lblTitle = new Label(title);
+        lblTitle.setFont(Font.font("Arial", 14));
+        lblTitle.setStyle("-fx-text-fill: white;");
+
+        // The data label's color and font
+        dataLabel.setStyle("-fx-text-fill: white; -fx-font-weight: bold;");
+
+        // Order: Title, then Data
+        tile.getChildren().addAll(lblTitle, dataLabel);
+        return tile;
+    }
+
+    private Label createDataLabel(String data) {
+        Label lblData = new Label(data);
+        lblData.setFont(Font.font("Arial", FontWeight.BOLD, 30));
+        return lblData;
+    }
+
+    public VBox getView() {
+        updateDashboardData();
+        return dashboardView;
+    }
+
     public List<Sale> getSalesList() {
-        return sales;
-    }
-
-    // Keep your existing console method if you want (Optional)
-    public void showDashboard() {
-        // You can leave this as is for debugging
+        return masterSaleList;
     }
 }

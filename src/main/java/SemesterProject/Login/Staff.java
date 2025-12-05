@@ -1,11 +1,19 @@
 package SemesterProject.Login;
 import SemesterProject.User;
+import SemesterProject.Login.LoginManager; // Ensure LoginManager is imported for requestPasswordReset
 
 public class Staff extends User {
 
     public Staff(String userId,String username,String password,String fullName,String contactNumber) {
         super(userId, username, password, fullName, contactNumber,UserRoles.STAFF);
     }
+
+    // Concrete getter implementation for password
+    @Override
+    public String getPassword() {
+        return super.getPassword();
+    }
+
 
     // ---------------- Abstract Method Implementation
     @Override
@@ -59,6 +67,7 @@ public class Staff extends User {
         }
         System.out.println();
     }
+
     public void requestPasswordReset(LoginManager manager) {
         manager.requestPasswordReset(getUsername());
     }

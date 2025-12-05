@@ -1,102 +1,64 @@
 package SemesterProject;
-import SemesterProject.Login.UserRoles;
 
+import SemesterProject.Login.UserRoles;
 import java.time.LocalDateTime;
-import java.util.Objects;
+import java.time.format.DateTimeFormatter;
 
 public abstract class User {
-
-    private final String UserId;
+    private String userId;
     private String username;
-    private String HashPassword;      // Safe practice: store hash, not raw password
+    private String password;
     private String fullName;
     private String contactNumber;
-    private final UserRoles role;
-    private LocalDateTime lastLoginTime;
-    private boolean resetApproved = false;
+    private UserRoles role;
+    private LocalDateTime lastLogin;
 
-    public User(String UserId,String username,String SimplePassword,String fullName,String contactNumber,UserRoles role)
-    {
-        this.UserId=Objects.requireNonNull(UserId,"User ID cannot be null");
-        this.username=Objects.requireNonNull(username,"Username cannot be null");
-        this.fullName=Objects.requireNonNull(fullName,"Full name cannot be null");
-        this.contactNumber=Objects.requireNonNull(contactNumber,"Contact number cannot be null");
-        this.role = Objects.requireNonNull(role, "Role cannot be null");
-        this.HashPassword=EncryptPassword(SimplePassword);
-    }
-    protected String EncryptPassword(String Password) {
-        return "hash-"+Password.hashCode();
-    }
-    public boolean PasswordValidation(String inputpassword) {
-        return Objects.equals(HashPassword,EncryptPassword(inputpassword));
+    // Constructor
+    public User(String userId, String username, String password, String fullName, String contactNumber, UserRoles role) {
+        this.userId = userId;
+        this.username = username;
+        this.password = password;
+        this.fullName = fullName;
+        this.contactNumber = contactNumber;
+        this.role = role;
     }
 
-    public void updatePassword(String newPassword) {
-        this.HashPassword=EncryptPassword(newPassword);
-    }
+    // --- Core Abstract/Basic Methods ---
+    public abstract String[] getAllowedActions();
+    public abstract void displayDashboardGreeting();
 
-    public void updateContactNumber(String NewContact) {
-        this.contactNumber = NewContact;
-    }
-
-    public void updateUsername(String newUsername) {
-        this.username = newUsername;
+    public boolean PasswordValidation(String attemptedPassword) {
+        return this.password.equals(attemptedPassword);
     }
 
     public void setLastLogin() {
-        this.lastLoginTime = LocalDateTime.now();
+        this.lastLogin = LocalDateTime.now();
     }
 
-
-    public abstract String[] getAllowedActions();
-
-    public abstract void displayDashboardGreeting();
-
-    public String getUserId() {
-        return UserId;
+    public String ShowLastLogin() {
+        if (lastLogin == null) return "Never Logged In";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return lastLogin.format(formatter);
     }
 
-    public String getUsername() {
-        return username;
+    public void updatePassword(String newPassword) {
+        this.password = newPassword;
     }
 
-    public String getFullName() {
-        return fullName;
+    // --- Getters (Concrete) ---
+    public String getUserId() { return userId; }
+    public String getUsername() { return username; }
+    public String getPassword() { return password; }
+    public String getFullName() { return fullName; }
+    public String getContactNumber() { return contactNumber; }
+    public UserRoles getRole() { return role; }
+
+    // --- Setters (Concrete) ---
+    public void setUsername(String newUsername) {
+        this.username = newUsername;
     }
 
-    public String getContactNumber() {
-        return contactNumber;
-    }
-    public UserRoles getRole() {
-        return role;
-    }
-
-    public LocalDateTime getLastLoginTime() {
-        return lastLoginTime;
-    }
-    public String ShowLastLogin(){
-        if(lastLoginTime!=null){
-            return lastLoginTime.toString(); }
-        else{
-            return "Never Logged In";}
-    }
-    public boolean isResetApproved() {
-        return resetApproved;
-    }
-
-    public void setResetApproved(boolean resetApproved) {
-        this.resetApproved = resetApproved;
-    }
-
-
-    public void displayProfile() {
-        System.out.println("\n================== USER PROFILE ==================");
-        System.out.println("User ID    : "+UserId);
-        System.out.println("Name       : "+fullName);
-        System.out.println("Username   : "+username);
-        System.out.println("Contact    : "+contactNumber);
-        //System.out.println("Role       : "+//role);
-        System.out.println("Last Login : "+ShowLastLogin());
-        System.out.println("\n===================================================\n");
+    public void setFullName(String newFullName) {
+        this.fullName = newFullName;
     }
 }

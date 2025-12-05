@@ -3,12 +3,19 @@ import SemesterProject.User;
 import java.time.LocalDateTime;
 import SemesterProject.Exception.UserAlreadyExistsException;
 import SemesterProject.Exception.UserNotFoundException;
+import SemesterProject.GUI.MainApp;
 
 public class Admin extends User {
 
     public Admin(String userId, String username, String password, String fullName, String contactNumber) {
         super(userId, username, password, fullName, contactNumber,UserRoles.ADMIN);
     }
+
+    @Override
+    public String getPassword() {
+        return super.getPassword();
+    }
+
 
     @Override
     public String[] getAllowedActions() {
@@ -32,43 +39,43 @@ public class Admin extends User {
         System.out.println("===========================================\n");
     }
 
-    //Add a new user to the system
-    public void addUser(User[] users, User newUser)throws UserAlreadyExistsException, Exception{
-        for (int i=0;i<users.length;i++) {
-            if (users[i]!=null&&users[i].getUsername().equalsIgnoreCase(newUser.getUsername())) {
-                throw new UserAlreadyExistsException("Username already exists: "+newUser.getUsername());
-            }
-        }
+    // --- DELEGATION METHODS (Admin Exclusive, calling MainApp) ---
 
-        for (int i=0;i<users.length;i++) {
-            if(users[i]==null) {
-                users[i]=newUser;
-                System.out.println("User added successfully: "+newUser.getUsername());
-                return;
-            }
-        }
-        throw new Exception("User list is full. Cannot add more users.");
+    // Delegation to MainApp (which calls DatabaseManager)
+    public void addUser(MainApp app, User newUser) throws Exception {
+        app.addUser(newUser);
     }
 
-    // Remove a user
-    public void removeUser(User[] users, String username) throws UserNotFoundException,Exception{
-        for (int i=0;i<users.length;i++) {
-            if (users[i]!=null && users[i].getUsername().equalsIgnoreCase(username)) {
-                users[i] = null;
-                System.out.println("User removed successfully: "+username);
-                return;
-            }
+    // Delegation to MainApp (which calls DatabaseManager)
+    public void removeUser(MainApp app, String username) throws UserNotFoundException {
+        app.removeUser(username);
+    }
+
+    // Delegation to MainApp (which calls DatabaseManager)
+    public void updateUserDetails(MainApp app, String targetUsername, String newUsername, String newFullName) throws UserNotFoundException, UserAlreadyExistsException {
+        if (!app.updateUserDetails(targetUsername, newUsername, newFullName)) {
+            // This assumes updateUserDetails throws exception if username conflict, or returns false if user not found.
+            throw new UserNotFoundException("User not found: " + targetUsername);
         }
-        throw new UserNotFoundException("User not found: "+username);
     }
 
-    //Reset user's password
-    public void resetUserPassword(User user, String newPassword) {
-        user.updatePassword(newPassword);
-        System.out.println("Password reset successfully for: " + user.getUsername());
+    // Delegation to MainApp (for direct password reset)
+    public void resetUserPassword(MainApp app, String username, String newPassword) {
+        User userToReset = app.findUser(username);
+        if (userToReset != null) {
+            // FIX: Calling the correct method in MainApp with the new signature
+            if (app.adminApprovePasswordReset(username, newPassword)) {
+                System.out.println("Direct password reset successful for: " + username);
+            } else {
+                System.out.println("Direct password reset failed for: " + username);
+            }
+        } else {
+            System.out.println("User not found: " + username);
+        }
     }
 
-    //View user profile
+    // --- Existing Methods ---
+
     public void viewUserProfile(User user) {
         System.out.println("\n================ USER PROFILE =================");
         System.out.println("Name      : "+user.getFullName());
@@ -103,8 +110,4 @@ public class Admin extends User {
         updatePassword(newPassword);
         System.out.println("Your password has been successfully changed.");
     }
-
-
-
-
 }

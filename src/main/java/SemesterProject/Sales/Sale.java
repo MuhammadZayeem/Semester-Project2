@@ -1,53 +1,57 @@
 package SemesterProject.Sales;
 
-import SemesterProject.Part;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class Sale {
-    private Part part;
-    private int quantityUsed;
-    private LocalDateTime timestamp; // Stores both Date and Time
-    private double soldPrice;        // Locks the price at the moment of sale
+    private String partName;
+    private int quantitySold;
+    private double cost;
+    private LocalDateTime saleDateTime; // Store date/time for display
 
-    public Sale(Part part, int quantityUsed) {
-        this.part = part;
-        this.quantityUsed = quantityUsed;
-        this.timestamp = LocalDateTime.now(); // Sets current time automatically
+    // Constructor matching the three core transaction arguments
+    public Sale(String partName, int quantitySold, double cost) {
+        this.partName = partName;
+        this.quantitySold = quantitySold;
+        this.cost = cost;
+        this.saleDateTime = LocalDateTime.now(); // Default to current time if no timestamp provided
+    }
 
-        // We assume your Part class has getUnitPrice().
-        // If Part doesn't have it, cast 'part' to 'BodyPart' if needed.
-        // For this example, we assume Part or BodyPart has the price.
-        if (part instanceof SemesterProject.Body.BodyPart) {
-            this.soldPrice = ((SemesterProject.Body.BodyPart) part).getUnitPrice();
+    // NEW Constructor to support database retrieval (with Timestamp)
+    public Sale(String partName, int quantitySold, double cost, Timestamp timestamp) {
+        this.partName = partName;
+        this.quantitySold = quantitySold;
+        this.cost = cost;
+        // Convert SQL Timestamp to LocalDateTime for better JavaFX display integration
+        if (timestamp != null) {
+            this.saleDateTime = timestamp.toLocalDateTime();
         } else {
-            this.soldPrice = 0.0; // Fallback
+            this.saleDateTime = LocalDateTime.now();
         }
     }
 
-    public Part getPart() {
-        return part;
+    public String getPartName() {
+        return partName;
     }
 
-    public int getQuantityUsed() {
-        return quantityUsed;
+    public int getQuantitySold() {
+        return quantitySold;
     }
 
-    public LocalDateTime getTimestamp() {
-        return timestamp;
+    public double getCost() {
+        return cost;
     }
 
-    public double getSoldPrice() {
-        return soldPrice;
+    // NEW: Method to retrieve the Sale date/time (resolves similar errors)
+    public LocalDateTime getSaleDateTime() {
+        return saleDateTime;
     }
 
-    public double getTotalAmount() {
-        return soldPrice * quantityUsed;
-    }
-
-    // --- Helper for GUI Table Display ---
-    public String getFormattedTime() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("hh:mm a");
-        return timestamp.format(formatter);
+    // NEW: Utility method for UI display
+    public String getFormattedSaleDate() {
+        if (saleDateTime == null) return "N/A";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return saleDateTime.format(formatter);
     }
 }

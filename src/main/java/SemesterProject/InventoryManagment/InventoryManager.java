@@ -1,104 +1,69 @@
 package SemesterProject.InventoryManagment;
 
+import SemesterProject.Part;
+import SemesterProject.DatabaseManager;
 import java.util.ArrayList;
 import java.util.List;
-import SemesterProject.Part;
-import SemesterProject.Supplier.Supplier;
+import java.sql.SQLException;
 
 public class InventoryManager {
 
-    private List<Part> parts;
+    private List<Part> inventory;
+    private DatabaseManager dbManager;
 
+    public InventoryManager(DatabaseManager dbManager) {
+        // Initialize inventory list
+        this.inventory = new ArrayList<>();
+        this.dbManager = dbManager;
+    }
+
+    // Default constructor (should ideally not be used in DB mode)
     public InventoryManager() {
-        parts = new ArrayList<>();
+        this.inventory = new ArrayList<>();
+        this.dbManager = null;
     }
 
-    // Add any part
     public void addPart(Part part) {
-        parts.add(part);
-    }
-
-    // ----------------------------
-    // 1. SEARCH BY NAME
-    // ----------------------------
-    public List<Part> searchByName(String name) {
-        List<Part> result = new ArrayList<>();
-
-        for (Part p : parts) {
-            if (p.getName().equalsIgnoreCase(name)) {
-                result.add(p);
-            }
-        }
-        return result;
-    }
-
-
-    // ----------------------------
-    // 2. SEARCH BY CATEGORY
-    // ----------------------------
-    public List<Part> searchByCategory(String category) {
-        List<Part> result = new ArrayList<>();
-
-        for (Part p : parts) {
-            if (p.getCategory().equalsIgnoreCase(category)) {
-                result.add(p);
-            }
-        }
-        return result;
-    }
-
-
-    // ----------------------------
-    // 3. SEARCH BY CAR MODEL
-    // ----------------------------
-    public List<Part> searchByCarModel(String model) {
-        List<Part> result = new ArrayList<>();
-
-        for (Part p : parts) {
-            if (p.getCarModel().equalsIgnoreCase(model)) {
-                result.add(p);
-            }
-        }
-        return result;
-    }
-
-
-    // ----------------------------
-    // 4. SEARCH BY SUPPLIER
-    // ----------------------------
-    // To use this, Supplier must have a part list.
-    // suppliers will be passed from SupplierManager
-    public List<Part> searchBySupplier(Supplier supplier) {
-        return supplier.getSuppliedParts();
-    }
-
-
-    // ----------------------------
-    // 5. FILTER: LOW STOCK
-    // ----------------------------
-    public List<Part> filterLowStock() {
-        List<Part> result = new ArrayList<>();
-
-        for (Part p : parts) {
-            if (p.isLowStock()) {   // uses your overridable method
-                result.add(p);
-            }
-        }
-        return result;
-    }
-
-    // ----------------------------
-    // List all parts
-    // ----------------------------
-    public void listAllParts() {
-        if (parts.isEmpty()) {
-            System.out.println("No parts in inventory.");
+        if (inventory.stream().anyMatch(p -> p.getName().equalsIgnoreCase(part.getName()))) {
             return;
         }
+        inventory.add(part);
 
-        System.out.println("------ ALL INVENTORY PARTS ------");
-        for (Part p : parts) {
-            p.displayDetails();
+        if (dbManager != null) {
+            try {
+                dbManager.addPart(part);
+            } catch (SQLException e) {
+                System.err.println("Database error adding part: " + e.getMessage());
+            }
         }
+    }
+
+    public void updateStock(Part part, int quantityChange) throws SQLException {
+        // NOTE: The stock level in the local 'part' object is usually updated by the caller (MainApp)
+        // before calling this method to ensure synchronization.
+
+        // Persist change to database if available
+        if (dbManager != null) {
+            dbManager.updatePart(part);
+            System.out.println("Stock updated in DB for: " + part.getName());
+        } else {
+            // Throw exception or handle error if manager isn't linked to DB
+            throw new IllegalStateException("InventoryManager not connected to DatabaseManager.");
+        }
+    }
+
+    public Part getPartByName(String name) {
+        return inventory.stream()
+                .filter(p -> p.getName().equalsIgnoreCase(name))
+                .findFirst()
+                .orElse(null);
+    }
+
+    /**
+     * FIX: Re-implementing the missing method to satisfy dependencies (e.g., MainApp).
+     * This returns the internal, database-loaded list of parts.
+     */
+    public List<Part> getInventory() {
+        return inventory;
     }
 }

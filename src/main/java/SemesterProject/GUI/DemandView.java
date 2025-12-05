@@ -41,7 +41,12 @@ public class DemandView extends VBox {
         TableColumn<DemandItem, String> colSupplier = new TableColumn<>("Supplier");
         colSupplier.setCellValueFactory(cellData -> {
             try {
-                return new SimpleStringProperty(cellData.getValue().getPart().getSupplier().getName());
+                // Assuming Supplier has a getName() method. If not, this might need adjustment.
+                // Using safe navigation or try-catch in case supplier is null
+                if (cellData.getValue().getPart().getSupplier() != null) {
+                    return new SimpleStringProperty(cellData.getValue().getPart().getSupplier().getName());
+                }
+                return new SimpleStringProperty("N/A");
             } catch (Exception e) {
                 return new SimpleStringProperty("N/A");
             }
@@ -49,11 +54,13 @@ public class DemandView extends VBox {
 
         // 3. Quantity Needed
         TableColumn<DemandItem, String> colQty = new TableColumn<>("Qty Needed");
+        // FIX: Changed getRequiredQuantity() to getQuantityNeeded()
         colQty.setCellValueFactory(cellData ->
-                new SimpleStringProperty(String.valueOf(cellData.getValue().getRequiredQuantity())));
+                new SimpleStringProperty(String.valueOf(cellData.getValue().getQuantityNeeded())));
 
         // 4. Total Cost
         TableColumn<DemandItem, String> colCost = new TableColumn<>("Est. Cost");
+        // FIX: This now works because we added getTotalCost() to DemandItem
         colCost.setCellValueFactory(cellData ->
                 new SimpleStringProperty(String.valueOf(cellData.getValue().getTotalCost())));
 
@@ -73,13 +80,21 @@ public class DemandView extends VBox {
 
     public void refreshTable() {
         try {
-            // Using reflection to access the private list in DemandManager
+            // Using reflection to access the private list in DemandManager (as per your provided code structure)
             Field f = DemandManager.class.getDeclaredField("demandList");
             f.setAccessible(true);
             ArrayList<DemandItem> list = (ArrayList<DemandItem>) f.get(demandManager);
+
+            // Standard way if getter is available:
+            // ArrayList<DemandItem> list = demandManager.getDemandList();
+
             table.getItems().setAll(list);
         } catch (Exception e) {
             System.out.println("Error accessing demand list: " + e.getMessage());
+            // Fallback if reflection fails, try public getter
+            if (demandManager.getDemandList() != null) {
+                table.getItems().setAll(demandManager.getDemandList());
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 module com.example.demo { // Keep your project name here (whatever was there before)
     requires javafx.controls;
     requires javafx.fxml;
+    requires java.sql;
 
     // Give JavaFX permission to access your GUI folder
     exports SemesterProject.GUI;
