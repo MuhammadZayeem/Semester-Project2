@@ -50,7 +50,7 @@ public class SupplierManager {
     // -------------------------
     // List All Suppliers
     // -------------------------
-    public void listSuppliers() {
+    /*public void listSuppliers() {
         if (suppliers.isEmpty()) {
             System.out.println("No suppliers available.");
             return;
@@ -60,7 +60,7 @@ public class SupplierManager {
         for (Supplier s : suppliers) {
             s.displaySupplierDetails();
         }
-    }
+    }*/
 
     // -------------------------
     // Assign a Part to a Supplier

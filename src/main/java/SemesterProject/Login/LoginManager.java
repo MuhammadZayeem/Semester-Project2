@@ -1,5 +1,5 @@
 package SemesterProject.Login;
-import SemesterProject.User; // <-- FIX: This import is required
+import SemesterProject.User;
 import java.util.ArrayList;
 import java.util.List;
 import SemesterProject.DatabaseManager;
@@ -13,60 +13,53 @@ public class LoginManager {
         this.dbManager = dbManager;
     }
 
-    // ------------------- LOGIN -------------------
+    // --------------------------------------------------------------------LOGIN
     public User login(String username, String password) {
         User u = dbManager.findUserByUsername(username);
 
         if (u == null) {
-            System.out.println("User not found!");
+            //"User not found!"
             return null;
         }
         if (u.PasswordValidation(password)) {
             dbManager.updateLastLogin(username);
-            u.setLastLogin();
-            System.out.println("Login successful!");
+            //login success
             return u;
         } else {
-            System.out.println("Incorrect password!");
+            //wrong password
             return null;
         }
     }
 
-    // ------------------- FIND USER (Publicly accessible) -------------------
+    // --------------------------------------------------------FIND USER
     public User findUser(String username) {
         return dbManager.findUserByUsername(username);
     }
 
-    // ------------------- STAFF REQUEST PASSWORD RESET -------------------
+    // -------------------------------------- STAFF REQUEST PASSWORD RESET
     public void requestPasswordReset(String username) {
         User user = findUser(username);
         if (user == null) {
-            System.out.println("Username not found.");
-            return;
-        }
-        if (user.getRole()!=UserRoles.STAFF) {
-            System.out.println("Only Staff can request password reset.");
+            //no user found
             return;
         }
 
         for (PasswordResetRequest req : resetRequests) {
             if (req.getUsername().equalsIgnoreCase(username)) {
-                System.out.println("A password reset request already exists by this user.");
+                 //only staff can request
                 return;
             }
         }
         resetRequests.add(new PasswordResetRequest(username));
-        System.out.println("Password reset request sent to Admin.");
+        //password reset req sent
     }
 
-    // ------------------- ADMIN APPROVE RESET -------------------
+    // ----------------------------------------------------------------------- ADMIN APPROVE RESET
     public boolean approvePasswordReset(String adminUsername, String staffUsername, String newPassword) {
         User admin = findUser(adminUsername);
         if (admin == null || admin.getRole() != UserRoles.ADMIN) {
-            System.out.println("Only Admin can approve password reset.");
             return false;
         }
-
         PasswordResetRequest request = null;
         for (PasswordResetRequest req : resetRequests) {
             if (req.getUsername().equalsIgnoreCase(staffUsername)) {
@@ -74,33 +67,27 @@ public class LoginManager {
                 break;
             }
         }
-        if (request == null) {
-            System.out.println("No password reset request found for this staff.");
-            return false;
-        }
 
-        // Use DBManager to update password
+        //-------------------------------------------------------------------DBManager to update password
         if (dbManager.updatePassword(staffUsername, newPassword)) {
-            resetRequests.remove(request); // Remove from in-memory list
-            System.out.println("Password reset approved and updated by Admin.");
+            resetRequests.remove(request);
+            //password updated
             return true;
         } else {
-            System.out.println("Failed to update password in database.");
+            //failed to update
             return false;
         }
     }
 
-    // ------------------- GET PENDING RESET REQUESTS -------------------
+    // ----------------------------------------------------------------GET PENDING RESET REQUESTS
     public List<PasswordResetRequest> getPendingRequests() {
         return new ArrayList<>(resetRequests);
     }
 
-    // ------------------- GET ALL USERS (from DB) -------------------
+    // ------------------------------------------------------GET ALL USERS
     public List<User> getActiveUsers() {
         return dbManager.getAllUsers();
     }
 
-    public void showPendingRequests() {
-
-    }
+    //public void showPendingRequests() {}
 }

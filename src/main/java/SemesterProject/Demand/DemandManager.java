@@ -1,27 +1,21 @@
 package SemesterProject.Demand;
-
 import SemesterProject.Part;
 import java.util.ArrayList;
 import java.util.List;
 
 public class DemandManager {
 
-    private ArrayList<DemandItem> demandList;
+    private  ArrayList<DemandItem> demandList;
 
     public DemandManager() {
         this.demandList = new ArrayList<>();
     }
 
-    public void generateAutoDemands(List<Part> masterInventory) {
+    public void generateAutoDemands(List<Part> Inventory) {
         demandList.clear();
-
-        for (Part p : masterInventory) {
-            // FIX: Updated method names to match the new Part class structure
+        for (Part p : Inventory) {
             if (p.getCurrentStock() <= p.getMinThreshold()) {
-
-                // Logic: Order enough to reach threshold + 10 buffer
-                int orderQty = (p.getMinThreshold() - p.getCurrentStock()) + 10;
-
+                int orderQty = (p.getMinThreshold() - p.getCurrentStock()) + 5;
                 demandList.add(new DemandItem(p, orderQty, true));
             }
         }
@@ -29,9 +23,5 @@ public class DemandManager {
 
     public ArrayList<DemandItem> getDemandList() {
         return demandList;
-    }
-
-    public int getDemandCount() {
-        return demandList.size();
     }
 }

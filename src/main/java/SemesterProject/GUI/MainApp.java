@@ -1,8 +1,5 @@
 package SemesterProject.GUI;
-
 import SemesterProject.Body.*;
-import SemesterProject.Dashboard.DashboardManager;
-import SemesterProject.Demand.DemandManager;
 import SemesterProject.InventoryManagment.InventoryManager;
 import SemesterProject.Login.Admin;
 import SemesterProject.Login.LoginManager;
@@ -16,6 +13,7 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
+import SemesterProject.Demand.DemandManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,7 +61,7 @@ public class MainApp extends Application {
     private void loadAndPopulateData() {
         if (dbManager.getAllUsers().isEmpty()) {
             try {
-                dbManager.addUser(new Admin(null, "admin", "123", "System Admin", "0000"));
+                dbManager.addUser(new Admin(null, "admin", "123"));
                 dbManager.addUser(new Staff(null, "staff", "123", "John Doe", "1111"));
             } catch (Exception e) { System.err.println("Failed to insert default users: " + e.getMessage()); }
         }

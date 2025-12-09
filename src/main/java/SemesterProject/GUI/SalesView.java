@@ -11,19 +11,18 @@ import javafx.scene.control.TableView;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-
 import java.util.List;
 
 public class SalesView extends VBox {
 
     private TableView<Sale> table;
-    private List<Sale> masterSaleList;
+    private List<Sale> SaleList;
 
     public SalesView(List<Sale> masterSaleList) {
-        this.masterSaleList = masterSaleList;
+        this.SaleList = masterSaleList;
         this.setPadding(new Insets(20));
         this.setSpacing(10);
-        this.setStyle("-fx-background-color: #f4f4f4;");
+        this.setStyle("-fx-background-color: Light Gray");
 
         Label lblHeader = new Label("Sales History & Transactions");
         lblHeader.setFont(Font.font("Arial", FontWeight.BOLD, 22));
@@ -61,7 +60,7 @@ public class SalesView extends VBox {
     }
 
     public void refreshTable() {
-        ObservableList<Sale> data = FXCollections.observableArrayList(masterSaleList);
+        ObservableList<Sale> data = FXCollections.observableArrayList(SaleList);
         table.setItems(data);
     }
 }
