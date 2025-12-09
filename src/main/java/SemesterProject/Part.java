@@ -15,7 +15,7 @@ public abstract class Part {
     protected double unitPrice;
     protected Supplier supplier;
 
-    // 8-Argument Constructor (Standardized)
+    // Standard 7-Argument Constructor for DB
     public Part(String partId, String name, String category, String carChasis,
                 int quantity, int threshold, double unitPrice, Supplier supplier) {
         this.partId = partId;
@@ -30,6 +30,7 @@ public abstract class Part {
 
     public abstract void displayDetails();
 
+    // Public methods (Keep for compatibility)
     public void addQuantity(int amount) {
         if (amount <= 0) return;
         this.quantity += amount;

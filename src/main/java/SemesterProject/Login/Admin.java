@@ -3,7 +3,7 @@ import SemesterProject.User;
 import java.time.LocalDateTime;
 import SemesterProject.Exception.UserAlreadyExistsException;
 import SemesterProject.Exception.UserNotFoundException;
-import SemesterProject.GUI.MainApp;
+import SemesterProject.GUI.MainApp; // CRITICAL: Import MainApp for delegation
 
 public class Admin extends User {
 
@@ -40,30 +40,38 @@ public class Admin extends User {
     }
 
     // --- DELEGATION METHODS (Admin Exclusive, calling MainApp) ---
+    // Note: All methods that previously took User[] now delegate to MainApp.
 
-    // Delegation to MainApp (which calls DatabaseManager)
+    /**
+     * Delegates adding a new user via MainApp (which calls DatabaseManager).
+     */
     public void addUser(MainApp app, User newUser) throws Exception {
         app.addUser(newUser);
     }
 
-    // Delegation to MainApp (which calls DatabaseManager)
+    /**
+     * Delegates removing a user via MainApp (which calls DatabaseManager).
+     */
     public void removeUser(MainApp app, String username) throws UserNotFoundException {
         app.removeUser(username);
     }
 
-    // Delegation to MainApp (which calls DatabaseManager)
+    /**
+     * Delegates updating user details via MainApp (which calls DatabaseManager).
+     */
     public void updateUserDetails(MainApp app, String targetUsername, String newUsername, String newFullName) throws UserNotFoundException, UserAlreadyExistsException {
+        // MainApp delegates to DBManager and returns true/false based on success
         if (!app.updateUserDetails(targetUsername, newUsername, newFullName)) {
-            // This assumes updateUserDetails throws exception if username conflict, or returns false if user not found.
             throw new UserNotFoundException("User not found: " + targetUsername);
         }
     }
 
-    // Delegation to MainApp (for direct password reset)
+    /**
+     * Delegates direct password reset via MainApp.
+     */
     public void resetUserPassword(MainApp app, String username, String newPassword) {
         User userToReset = app.findUser(username);
         if (userToReset != null) {
-            // FIX: Calling the correct method in MainApp with the new signature
             if (app.adminApprovePasswordReset(username, newPassword)) {
                 System.out.println("Direct password reset successful for: " + username);
             } else {
@@ -95,6 +103,9 @@ public class Admin extends User {
         System.out.println();
     }
 
+    // Note: approveStaffPassword and viewPendingRequests still rely on LoginManager being passed.
+    // If they were intended to be deprecated, they would be removed. They remain for completeness.
+
     public void approveStaffPassword(LoginManager manager, String staffUsername, String newPassword) {
         manager.approvePasswordReset(getUsername(), staffUsername, newPassword);
     }
@@ -102,6 +113,7 @@ public class Admin extends User {
     public void viewPendingRequests(LoginManager manager) {
         manager.showPendingRequests();
     }
+
     public void changeOwnPassword(String oldPassword, String newPassword) {
         if (!PasswordValidation(oldPassword)) {
             System.out.println("Old password is incorrect!");
