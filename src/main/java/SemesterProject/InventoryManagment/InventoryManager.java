@@ -23,7 +23,7 @@ public class InventoryManager {
         this.dbManager = null;
     }
 
-    public void addPart(Part part) {
+   /* public void addPart(Part part) {
         if (inventory.stream().anyMatch(p -> p.getName().equalsIgnoreCase(part.getName()))) {
             return;
         }
@@ -36,7 +36,7 @@ public class InventoryManager {
                 System.err.println("Database error adding part: " + e.getMessage());
             }
         }
-    }
+    }*/
 
     public void updateStock(Part part, int quantityChange) throws SQLException {
         // NOTE: The stock level in the local 'part' object is usually updated by the caller (MainApp)

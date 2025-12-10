@@ -1,7 +1,6 @@
 package SemesterProject.GUI;
 
 import SemesterProject.Body.*;
-import SemesterProject.Dashboard.DashboardManager;
 import SemesterProject.Demand.DemandManager;
 import SemesterProject.InventoryManagment.InventoryManager;
 import SemesterProject.Login.Admin;

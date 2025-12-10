@@ -1,6 +1,5 @@
 package SemesterProject.GUI;
 
-import SemesterProject.Dashboard.DashboardManager;
 import javafx.scene.layout.BorderPane;
 
 public class DashboardView extends BorderPane {

@@ -13,7 +13,7 @@ public abstract class Part {
     protected int quantity;
     protected int threshold;
     protected double unitPrice;
-    protected Supplier supplier;
+   protected Supplier supplier;
 
     // 8-Argument Constructor (Standardized)
     public Part(String partId, String name, String category, String carChasis,
@@ -28,23 +28,22 @@ public abstract class Part {
         this.supplier = supplier;
     }
 
-    public abstract void displayDetails();
-
     public void addQuantity(int amount) {
         if (amount <= 0) return;
         this.quantity += amount;
     }
 
-    public void reduceQuantity(int amount) throws LowStockException, NegativeStockException {
+   /* public void reduceQuantity(int amount) throws LowStockException, NegativeStockException {
         if (amount <= 0) return;
         if (quantity - amount < 0) throw new NegativeStockException("Stock for " + name + " cannot go negative!");
         this.quantity -= amount;
         if (isLowStock()) throw new LowStockException("Low stock alert for: " + name);
     }
+   */// public abstract void displayDetails();
 
-    public boolean isLowStock() { return this.quantity <= this.threshold; }
+ //   public boolean isLowStock() { return this.quantity <= this.threshold; }
 
-    public double calculateStockValue() { return quantity * unitPrice; }
+   // public double calculateStockValue() { return quantity * unitPrice; }
 
     // Getters & Setters
     public String getName() { return name; }
@@ -53,12 +52,12 @@ public abstract class Part {
     public int getCurrentStock() { return quantity; }
     public int getMinThreshold() { return threshold; }
     public double getUnitPrice() { return unitPrice; }
-    public Supplier getSupplier() { return supplier; }
-    public String getPartId() { return partId; }
+   public Supplier getSupplier() { return supplier; }
+  //  public String getPartId() { return partId; }
 
-    public void setPartId(String partId) { this.partId = partId; }
+    //  public void setPartId(String partId) { this.partId = partId; }
     public void setCurrentStock(int quantity) { this.quantity = quantity; }
-    public void setThreshold(int threshold) { this.threshold = threshold; }
-    public void setUnitPrice(double unitPrice) { this.unitPrice = unitPrice; }
-    public void setSupplier(Supplier supplier) { this.supplier = supplier; }
+   // public void setThreshold(int threshold) { this.threshold = threshold; }
+    //public void setUnitPrice(double unitPrice) { this.unitPrice = unitPrice; }
+    //public void setSupplier(Supplier supplier) { this.supplier = supplier; }
 }

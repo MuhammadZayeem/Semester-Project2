@@ -9,6 +9,7 @@ public class DashboardData {
     private int supplierAlerts;
     private int demandListCount;
 
+    //NO USE
     public DashboardData(int totalCategories, int totalParts, int todaysUsage,
                          int lowStockCount, int supplierAlerts, int demandListCount) {
         this.totalCategories = totalCategories;
@@ -19,10 +20,10 @@ public class DashboardData {
         this.demandListCount = demandListCount;
     }
 
-    public int getTotalCategories() { return totalCategories; }
+    /*public int getTotalCategories() { return totalCategories; }
     public int getTotalParts() { return totalParts; }
     public int getTodaysUsage() { return todaysUsage; }
     public int getLowStockCount() { return lowStockCount; }
     public int getSupplierAlerts() { return supplierAlerts; }
-    public int getDemandListCount() { return demandListCount; }
+    public int getDemandListCount() { return demandListCount; }*/
 }

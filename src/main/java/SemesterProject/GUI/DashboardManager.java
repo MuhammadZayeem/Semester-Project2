@@ -1,4 +1,4 @@
-package SemesterProject.Dashboard;
+package SemesterProject.GUI;
 
 import SemesterProject.Demand.DemandManager;
 import SemesterProject.Part;
@@ -12,9 +12,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 public class DashboardManager {

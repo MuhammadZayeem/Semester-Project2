@@ -6,9 +6,10 @@ import java.util.List;
 
 public class DemandManager {
 
-    private ArrayList<DemandItem> demandList;
+    private  ArrayList<DemandItem> demandList;
 
     public DemandManager() {
+
         this.demandList = new ArrayList<>();
     }
 
@@ -19,8 +20,8 @@ public class DemandManager {
             // FIX: Updated method names to match the new Part class structure
             if (p.getCurrentStock() <= p.getMinThreshold()) {
 
-                // Logic: Order enough to reach threshold + 10 buffer
-                int orderQty = (p.getMinThreshold() - p.getCurrentStock()) + 10;
+                // Logic: Order enough to reach threshold + 5 buffer
+                int orderQty = (p.getMinThreshold() - p.getCurrentStock()) + 5;
 
                 demandList.add(new DemandItem(p, orderQty, true));
             }
@@ -30,8 +31,8 @@ public class DemandManager {
     public ArrayList<DemandItem> getDemandList() {
         return demandList;
     }
-
+/*
     public int getDemandCount() {
         return demandList.size();
-    }
+    }*/
 }
