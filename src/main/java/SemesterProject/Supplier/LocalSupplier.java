@@ -10,7 +10,7 @@ public class LocalSupplier extends Supplier {
         super(name, contact, email, address, specialization);
     }
 
-    @Override
+   /* @Override
     public void displaySupplierDetails() {
         System.out.println("--------- SUPPLIER DETAILS ---------");
         System.out.println("Name: " + getName());
@@ -19,7 +19,7 @@ public class LocalSupplier extends Supplier {
         System.out.println("Address: " + getAddress());
         System.out.println("Specialization: " + getSpecialization());
         System.out.println("------------------------------------");
-    }
+    }*/
 
     @Override
     public void addSuppliedPart(Part part) {

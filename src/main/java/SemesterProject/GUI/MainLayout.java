@@ -1,11 +1,11 @@
 package SemesterProject.GUI;
 
-import SemesterProject.Demand.DemandManager;
 import SemesterProject.InventoryManagment.InventoryManager;
 import SemesterProject.Login.Admin;
 import SemesterProject.Part;
 import SemesterProject.Sales.Sale;
 import SemesterProject.User;
+import SemesterProject.Demand.DemandManager;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -112,7 +112,7 @@ public class MainLayout extends BorderPane {
             demandManager.generateAutoDemands(masterPartList);
 
             // 2. Open the View using the manager
-            DemandView demandView = new DemandView(demandManager);
+            SemesterProject.GUI.DemandView demandView = new DemandView(demandManager);
             this.setCenter(demandView);
         });
 

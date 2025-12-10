@@ -12,11 +12,10 @@ import SemesterProject.Body.RearGlass;
 import SemesterProject.Body.DoorGlass;
 import SemesterProject.Body.FrontBumper;
 import SemesterProject.Body.RearBumper;
-import SemesterProject.Supplier.Supplier; // Import Supplier
-import SemesterProject.Supplier.LocalSupplier; // Import LocalSupplier for default
+import SemesterProject.Supplier.Supplier;
+import SemesterProject.Supplier.LocalSupplier;
 import SemesterProject.Exception.UserAlreadyExistsException;
 import SemesterProject.Exception.UserNotFoundException;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +23,6 @@ import java.util.UUID;
 
 public class DatabaseManager {
 
-    // IMPORTANT: REPLACE THESE WITH YOUR ACTUAL MySQL CREDENTIALS
     private static final String URL = "jdbc:mysql://localhost:3306/ims_project?serverTimezone=UTC";
     private static final String USER = "root";
     private static final String PASSWORD = "your_mysql_password";
@@ -63,7 +61,7 @@ public class DatabaseManager {
                     String contactNumber = rs.getString("contact_number");
                     UserRoles role = UserRoles.valueOf(rs.getString("role").toUpperCase());
                     if (role == UserRoles.ADMIN) {
-                        user = new Admin(userId, username, password, fullName, contactNumber);
+                        user = new Admin(userId, username, password);
                     } else if (role == UserRoles.STAFF) {
                         user = new Staff(userId, username, password, fullName, contactNumber);
                     }
@@ -84,7 +82,7 @@ public class DatabaseManager {
                 String fullName = rs.getString("full_name");
                 String contactNumber = rs.getString("contact_number");
                 UserRoles role = UserRoles.valueOf(rs.getString("role").toUpperCase());
-                if (role == UserRoles.ADMIN) users.add(new Admin(userId, username, password, fullName, contactNumber));
+                if (role == UserRoles.ADMIN) users.add(new Admin(userId, username, password));
                 else if (role == UserRoles.STAFF) users.add(new Staff(userId, username, password, fullName, contactNumber));
             }
         } catch (SQLException e) { System.err.println("SQL Error retrieving all users: " + e.getMessage()); }
@@ -106,8 +104,6 @@ public class DatabaseManager {
             pstmt.setString(1, newUserId);
             pstmt.setString(2, newUser.getUsername());
             pstmt.setString(3, newUser.getPassword());
-            pstmt.setString(4, newUser.getFullName());
-            pstmt.setString(5, newUser.getContactNumber());
             pstmt.setString(6, newUser.getRole().name());
             pstmt.executeUpdate();
             System.out.println("User added successfully: " + newUser.getUsername() + " (ID: " + newUserId + ")");

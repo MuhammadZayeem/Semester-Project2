@@ -9,7 +9,6 @@ module com.example.demo { // Keep your project name here (whatever was there bef
     // Allow access to the rest of your project
     exports SemesterProject;
     exports SemesterProject.Body;
-    exports SemesterProject.Dashboard;
     exports SemesterProject.Demand;
     exports SemesterProject.InventoryManagment;
     exports SemesterProject.Login;

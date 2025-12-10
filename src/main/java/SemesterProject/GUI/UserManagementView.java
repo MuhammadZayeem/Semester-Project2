@@ -15,6 +15,7 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -22,7 +23,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import java.util.ArrayList;
 import java.util.List;
-import java.sql.SQLException; // Although not directly used, good for related DB exceptions
+import java.sql.SQLException;
 
 public class UserManagementView extends VBox {
 
@@ -34,10 +35,9 @@ public class UserManagementView extends VBox {
     // Status label for feedback
     private Label lblStatus;
 
-    // FIX: This constructor signature matches the one required by MainLayout.java
     public UserManagementView(MainApp app, User currentUser) {
         this.app = app;
-        // FIX: Ensure Admin class is correctly imported and cast is valid (checked by compiler if Admin.java is correct)
+        // Verify only Admin can access
         if (!(currentUser instanceof Admin)) {
             this.getChildren().add(new Label("Access Denied. Admin privileges required."));
             return;
@@ -62,12 +62,13 @@ public class UserManagementView extends VBox {
 
         this.getChildren().addAll(lblHeader, lblStatus, tabPane);
 
+        // Initial table load
         refreshUserTable();
         refreshResetTable();
     }
 
     // ===============================================
-    // TAB 1: USER MANAGEMENT
+    // TAB 1: REGISTERED USERS
     // ===============================================
     private Tab createUserManagementTab() {
         userTable = new TableView<>();
@@ -79,17 +80,15 @@ public class UserManagementView extends VBox {
         TableColumn<User, String> colUser = new TableColumn<>("Username");
         colUser.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getUsername()));
 
-        TableColumn<User, String> colName = new TableColumn<>("Full Name");
-        colName.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getFullName()));
+        // --- REMOVED COLUMN (Full Name) ---
+        // TableColumn<User, String> colName = new TableColumn<>("Full Name");
+        // colName.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getFullName()));
 
         TableColumn<User, String> colRole = new TableColumn<>("Role");
         colRole.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getRole().name()));
 
-        TableColumn<User, String> colLogin = new TableColumn<>("Last Login");
-        colLogin.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().ShowLastLogin()));
-        colLogin.setPrefWidth(150);
-
-        userTable.getColumns().addAll(colID, colUser, colName, colRole, colLogin);
+        // Only include ID, Username, and Role
+        userTable.getColumns().addAll(colID, colUser, colRole);
         userTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
         VBox actionBox = createAdminActionBox();
@@ -121,51 +120,66 @@ public class UserManagementView extends VBox {
         lblAdd.setFont(Font.font("Arial", FontWeight.BOLD, 12));
 
         TextField txtNewUser = new TextField();
-        txtNewUser.setPromptText("Username");
+        txtNewUser.setPromptText("Username (required)");
 
         PasswordField txtNewPass = new PasswordField();
-        txtNewPass.setPromptText("Password");
+        txtNewPass.setPromptText("Password (required)");
+
+        // Retain placeholders for data integrity when creating the User object
+        // Full Name and Contact Number fields were removed from the GUI.
 
         TextField txtNewName = new TextField();
-        txtNewName.setPromptText("Full Name");
-
         TextField txtNewContact = new TextField();
-        txtNewContact.setPromptText("Contact Number (e.g., 0000)");
 
         ComboBox<UserRoles> cmbRole = new ComboBox<>(FXCollections.observableArrayList(UserRoles.ADMIN, UserRoles.STAFF));
-        cmbRole.setPromptText("Select Role");
+        cmbRole.setPromptText("Select Role (required)");
         cmbRole.setMaxWidth(Double.MAX_VALUE);
 
         Button btnAddUser = new Button("Add User");
         btnAddUser.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold;");
         btnAddUser.setMaxWidth(Double.MAX_VALUE);
 
+        // Layout the fields (Simplified layout)
+        GridPane grid = new GridPane();
+        grid.setVgap(10);
+        grid.setHgap(10);
+
+        grid.addRow(0, new Label("Username:"), txtNewUser);
+        grid.addRow(1, new Label("Password:"), txtNewPass);
+        grid.addRow(2, new Label("Role:"), cmbRole);
+
+        // --- Save Action ---
         btnAddUser.setOnAction(e -> {
             String username = txtNewUser.getText().trim();
             String password = txtNewPass.getText();
-            String fullName = txtNewName.getText().trim();
-            String contact = txtNewContact.getText().trim();
             UserRoles role = cmbRole.getValue();
 
-            if (username.isEmpty() || password.isEmpty() || fullName.isEmpty() || role == null) {
-                lblStatus.setText("Error: All fields must be filled to add user.");
+            // Validation: Only check mandatory fields (Username, Password, Role)
+            if (username.isEmpty() || password.isEmpty() || role == null) {
+                lblStatus.setText("Error: Username, Password, and Role are required.");
                 lblStatus.setStyle("-fx-text-fill: red;");
                 return;
             }
 
             try {
                 User newUser;
+                // Pass default strings for the missing GUI fields to satisfy the constructor:
+                String defaultName = username + " User";
+                String defaultContact = "N/A";
+
                 if (role == UserRoles.ADMIN) {
-                    newUser = new Admin(null, username, password, fullName, contact);
+                    newUser = new Admin(null, username, password);
                 } else {
-                    newUser = new Staff(null, username, password, fullName, contact);
+                    newUser = new Staff(null, username, password, defaultName, defaultContact);
                 }
 
-                adminUser.addUser(app, newUser);
+                adminUser.addUser(app, newUser); // Delegates to MainApp
                 lblStatus.setText("User '" + username + "' added successfully as " + role + ".");
                 lblStatus.setStyle("-fx-text-fill: #27ae60;");
-                refreshUserTable();
-                txtNewUser.clear(); txtNewPass.clear(); txtNewName.clear(); txtNewContact.clear(); cmbRole.getSelectionModel().clearSelection();
+                refreshUserTable(); // Refresh table to show new user from DB
+
+                // Clear inputs
+                txtNewUser.clear(); txtNewPass.clear(); cmbRole.getSelectionModel().clearSelection();
             } catch (UserAlreadyExistsException ex) {
                 lblStatus.setText("Error adding user: " + ex.getMessage());
                 lblStatus.setStyle("-fx-text-fill: red;");
@@ -175,68 +189,13 @@ public class UserManagementView extends VBox {
             }
         });
 
-        addUserBox.getChildren().addAll(lblAdd, txtNewUser, txtNewPass, txtNewName, txtNewContact, cmbRole, btnAddUser);
+        addUserBox.getChildren().addAll(lblAdd, grid, btnAddUser);
         container.getChildren().add(addUserBox);
 
-        // --- 2. Update Details Section (Edit Name/Username) ---
-        VBox updateDetailsBox = new VBox(5);
-        updateDetailsBox.setStyle("-fx-padding: 10 0 10 0; -fx-border-width: 1 0 1 0; -fx-border-color: #bdc3c7;");
-
-        Label lblUpdate = new Label("2. Edit User Details (Name/Username)");
-        lblUpdate.setFont(Font.font("Arial", FontWeight.BOLD, 12));
-
-        TextField txtTargetUser = new TextField();
-        txtTargetUser.setPromptText("Target Username (Current)");
-
-        TextField txtNewUsername = new TextField();
-        txtNewUsername.setPromptText("New Username");
-
-        TextField txtNewFullName = new TextField();
-        txtNewFullName.setPromptText("New Full Name");
-
-        Button btnUpdateDetails = new Button("Update Details");
-        btnUpdateDetails.setStyle("-fx-background-color: #1abc9c; -fx-text-fill: white; -fx-font-weight: bold;");
-        btnUpdateDetails.setMaxWidth(Double.MAX_VALUE);
-
-        btnUpdateDetails.setOnAction(e -> {
-            String targetUser = txtTargetUser.getText().trim();
-            String newUsername = txtNewUsername.getText().trim();
-            String newFullName = txtNewFullName.getText().trim();
-
-            if (targetUser.isEmpty() || newUsername.isEmpty() || newFullName.isEmpty()) {
-                lblStatus.setText("Error: All update fields must be filled.");
-                lblStatus.setStyle("-fx-text-fill: red;");
-                return;
-            }
-
-            try {
-                adminUser.updateUserDetails(app, targetUser, newUsername, newFullName);
-                lblStatus.setText("Details for '" + targetUser + "' updated successfully to '" + newUsername + "'.");
-                lblStatus.setStyle("-fx-text-fill: #27ae60;");
-                refreshUserTable();
-                txtTargetUser.clear();
-                txtNewUsername.clear();
-                txtNewFullName.clear();
-            } catch (UserNotFoundException ex) {
-                lblStatus.setText("Error: User '" + targetUser + "' not found.");
-                lblStatus.setStyle("-fx-text-fill: red;");
-            } catch (UserAlreadyExistsException ex) {
-                lblStatus.setText("Error: " + ex.getMessage());
-                lblStatus.setStyle("-fx-text-fill: red;");
-            } catch (Exception ex) {
-                lblStatus.setText("System Error during update: " + ex.getMessage());
-                lblStatus.setStyle("-fx-text-fill: red;");
-            }
-        });
-
-        updateDetailsBox.getChildren().addAll(lblUpdate, txtTargetUser, txtNewUsername, txtNewFullName, btnUpdateDetails);
-        container.getChildren().add(updateDetailsBox);
-
-
-        // --- 3. Remove User Section ---
+        // --- 2. Remove User Section ---
         VBox removeBoxContainer = new VBox(5);
         removeBoxContainer.setStyle("-fx-padding: 10 0 10 0; -fx-border-width: 1 0 1 0; -fx-border-color: #bdc3c7;");
-        Label lblRemove = new Label("3. Remove User:");
+        Label lblRemove = new Label("2. Remove User:");
         lblRemove.setFont(Font.font("Arial", FontWeight.BOLD, 12));
 
         TextField txtRemoveUser = new TextField();
@@ -251,7 +210,7 @@ public class UserManagementView extends VBox {
                 adminUser.removeUser(app, txtRemoveUser.getText().trim());
                 lblStatus.setText("User '" + txtRemoveUser.getText().trim() + "' removed successfully.");
                 lblStatus.setStyle("-fx-text-fill: #27ae60;");
-                refreshUserTable();
+                refreshUserTable(); // Refresh table to show removed user
                 txtRemoveUser.clear();
             } catch (Exception ex) {
                 lblStatus.setText("Error removing user: " + ex.getMessage());
@@ -263,9 +222,9 @@ public class UserManagementView extends VBox {
         container.getChildren().add(removeBoxContainer);
 
 
-        // --- 4. Reset Password Section (Direct Admin Reset) ---
+        // --- 3. Reset Password Section (Direct Admin Reset) ---
         VBox resetBoxContainer = new VBox(5);
-        Label lblReset = new Label("4. Direct Password Reset:");
+        Label lblReset = new Label("3. Direct Password Reset:");
         lblReset.setFont(Font.font("Arial", FontWeight.BOLD, 12));
 
         TextField txtResetUser = new TextField();
@@ -288,7 +247,7 @@ public class UserManagementView extends VBox {
                 return;
             }
 
-            adminUser.resetUserPassword(app, username, newPass);
+            adminUser.resetUserPassword(app, username, newPass); // Delegates to MainApp
 
             lblStatus.setText("Password reset initiated for '" + username + "'. Check console for status.");
             lblStatus.setStyle("-fx-text-fill: #27ae60;");
@@ -380,12 +339,11 @@ public class UserManagementView extends VBox {
         });
 
         dialog.showAndWait().ifPresent(newPassword -> {
-            // FIX: Calling the correct method in MainApp with the new signature
             if (app.adminApprovePasswordReset(staffUsername, newPassword)) {
                 lblStatus.setText("Password reset for '" + staffUsername + "' approved and updated!");
                 lblStatus.setStyle("-fx-text-fill: #27ae60;");
-                refreshResetTable();
-                refreshUserTable();
+                refreshResetTable(); // Refresh requests list
+                refreshUserTable(); // Optional: Refresh user list if necessary
             } else {
                 lblStatus.setText("Error: Failed to approve password reset for '" + staffUsername + "'.");
                 lblStatus.setStyle("-fx-text-fill: red;");
@@ -394,16 +352,17 @@ public class UserManagementView extends VBox {
     }
 
     /**
-     * Retrieves users from MainApp (which calls the DB).
+     * Retrieves all active users from the DB via MainApp and updates the table.
      */
     public void refreshUserTable() {
-        // Calls the correct DB-integrated method in MainApp
-        List<User> activeUsers = app.getActiveUsersList();
+        List<User> activeUsers = app.getActiveUsersList(); // Fetch data from DB
         ObservableList<User> data = FXCollections.observableArrayList(activeUsers);
         userTable.setItems(data);
     }
 
-    // Refresh the Password Reset Request Table
+    /**
+     * Retrieves all pending password reset requests from LoginManager and updates the table.
+     */
     public void refreshResetTable() {
         List<PasswordResetRequest> requests = app.getPendingPasswordResetRequests();
         ObservableList<PasswordResetRequest> data = FXCollections.observableArrayList(requests);

@@ -40,7 +40,7 @@ public abstract class Supplier  {
     // -------------------------
     // Abstract Method
     // -------------------------
-    public abstract void displaySupplierDetails();
+    //public abstract void displaySupplierDetails();
 
 
     // -------------------------

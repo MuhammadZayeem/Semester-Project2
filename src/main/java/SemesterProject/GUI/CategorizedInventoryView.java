@@ -1,7 +1,14 @@
 package SemesterProject.GUI;
 
 import SemesterProject.Part;
-import javafx.beans.property.SimpleDoubleProperty;
+import SemesterProject.Body.FrontLaminatedGlass;
+import SemesterProject.Body.FrontGlass;
+import SemesterProject.Body.RearGlass;
+import SemesterProject.Body.DoorGlass;
+import SemesterProject.Body.FrontBumper;
+import SemesterProject.Body.RearBumper;
+import SemesterProject.Supplier.LocalSupplier;
+import SemesterProject.Supplier.Supplier;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -14,29 +21,32 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow; // Import TableRow
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-
 import java.util.List;
 import java.util.stream.Collectors;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.TableRow;
+import javafx.scene.control.Alert;
 
 public class CategorizedInventoryView extends VBox {
 
     private List<Part> masterPartList;
     private MainApp app;
 
-    // UI Elements for dynamic display
     private TableView<Part> inventoryTable;
     private TabPane majorSubCategoryTabs;
 
-    // Footer Summary Labels
     private Label lblTotalCount;
     private Label lblTotalValue;
+
+    private VBox addPartFormContainer; // Container for the collapsible form
 
     public CategorizedInventoryView(List<Part> masterPartList, MainApp app) {
         this.masterPartList = masterPartList;
@@ -45,21 +55,135 @@ public class CategorizedInventoryView extends VBox {
         this.setSpacing(10);
         this.setStyle("-fx-background-color: white;");
 
-        // 1. Initialize the TableView
         inventoryTable = createInventoryTable();
         VBox.setVgrow(inventoryTable, Priority.ALWAYS);
 
-        // 2. Create the main layout
         VBox categorizedLayout = createCategorizedLayout();
-
-        // 3. Create Footer Summary
         HBox footer = createSummaryFooter();
 
-        this.getChildren().addAll(categorizedLayout, inventoryTable, footer);
+        addPartFormContainer = createAddPartForm();
+        addPartFormContainer.setVisible(false);
+        addPartFormContainer.setManaged(false);
 
-        // Load initial data for the default view
+        // Toggle Button for the form
+        Button btnToggleForm = new Button("Add New Part");
+        btnToggleForm.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;");
+        btnToggleForm.setOnAction(e -> {
+            boolean visible = !addPartFormContainer.isVisible();
+            addPartFormContainer.setVisible(visible);
+            addPartFormContainer.setManaged(visible);
+            btnToggleForm.setText(visible ? "Hide Form" : "Add New Part");
+        });
+
+        this.getChildren().addAll(categorizedLayout, btnToggleForm, addPartFormContainer, inventoryTable, footer);
+
         loadInventoryDataBySpecificType("Front Laminated");
     }
+
+    /**
+     * Creates the collapsible form for adding a new part.
+     */
+    private VBox createAddPartForm() {
+        VBox container = new VBox(10);
+        container.setPadding(new Insets(15));
+        container.setStyle("-fx-border-color: #bdc3c7; -fx-border-radius: 5; -fx-background-color: #f8f8f8;");
+
+        Label lblTitle = new Label("Add New Inventory Item");
+        lblTitle.setFont(Font.font("Arial", FontWeight.BOLD, 16));
+
+        GridPane grid = new GridPane();
+        grid.setVgap(10);
+        grid.setHgap(10);
+
+        // Input Fields
+        TextField txtName = new TextField(); txtName.setPromptText("Part Name (e.g., FLG)");
+        TextField txtModel = new TextField(); txtModel.setPromptText("Car Model (e.g., Corolla 2022)");
+        TextField txtPrice = new TextField(); txtPrice.setPromptText("Unit Price");
+        TextField txtQty = new TextField(); txtQty.setPromptText("Initial Quantity");
+        TextField txtThreshold = new TextField(); txtThreshold.setPromptText("Min Threshold (e.g., 5)");
+
+        // ComboBox for Part Type selection
+        ComboBox<String> cmbType = new ComboBox<>(FXCollections.observableArrayList(
+                "FrontLaminatedGlass", "FrontGlass", "RearGlass", "DoorGlass", "FrontBumper", "RearBumper"
+        ));
+        cmbType.setPromptText("Select Part Type");
+        cmbType.setMaxWidth(Double.MAX_VALUE);
+
+        Button btnSave = new Button("Save New Part");
+        btnSave.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold;");
+
+        // Layout the fields
+        grid.addRow(0, new Label("Name:"), txtName, new Label("Model:"), txtModel);
+        grid.addRow(1, new Label("Price:"), txtPrice, new Label("Qty:"), txtQty);
+        grid.addRow(2, new Label("Threshold:"), txtThreshold, new Label("Type:"), cmbType);
+
+        container.getChildren().addAll(lblTitle, grid, btnSave);
+
+        // --- Save Action ---
+        btnSave.setOnAction(e -> {
+            try {
+                String name = txtName.getText();
+                String model = txtModel.getText();
+                double price = Double.parseDouble(txtPrice.getText());
+                int qty = Integer.parseInt(txtQty.getText());
+                int threshold = Integer.parseInt(txtThreshold.getText());
+                String type = cmbType.getValue();
+
+                if (name.isEmpty() || model.isEmpty() || type == null) {
+                    throw new IllegalArgumentException("Name, Model, and Type are required.");
+                }
+
+                // 1. Instantiate the correct part class
+                Part newPart = createNewPartInstance(type, name, model, qty, threshold, price);
+
+                // 2. Delegate saving to MainApp
+                app.addUserPart(newPart);
+
+                // 3. Success Feedback and Refresh
+                new Alert(Alert.AlertType.INFORMATION, "Part saved successfully!").showAndWait();
+
+                // 4. Clear fields and refresh the display
+                txtName.clear(); txtModel.clear(); txtPrice.clear(); txtQty.clear(); txtThreshold.clear(); cmbType.getSelectionModel().clearSelection();
+                refreshTable();
+
+            } catch (NumberFormatException ex) {
+                new Alert(Alert.AlertType.ERROR, "Invalid number entered for price, quantity, or threshold.").showAndWait();
+            } catch (IllegalArgumentException ex) {
+                new Alert(Alert.AlertType.ERROR, ex.getMessage()).showAndWait();
+            } catch (Exception ex) {
+                new Alert(Alert.AlertType.ERROR, "Error saving part: " + ex.getMessage()).showAndWait();
+            }
+        });
+
+        return container;
+    }
+
+    /**
+     * Factory method to create the specific Part subclass instance.
+     */
+    private Part createNewPartInstance(String type, String name, String model, int qty, int threshold, double price) {
+        String t = null; // Temp ID (DBManager generates the final ID)
+        Supplier dummySupplier = app.getMockSupplier(); // Get dummy supplier from MainApp
+
+        switch (type) {
+            case "FrontLaminatedGlass":
+                // Using 7-argument constructor (including Supplier)
+                return new FrontLaminatedGlass(t, name, model, qty, threshold, price, dummySupplier);
+            case "FrontGlass":
+                return new FrontGlass(t, name, model, qty, threshold, price, dummySupplier);
+            case "RearGlass":
+                return new RearGlass(t, name, model, qty, threshold, price, dummySupplier);
+            case "DoorGlass":
+                return new DoorGlass(t, name, model, qty, threshold, price, dummySupplier);
+            case "FrontBumper":
+                return new FrontBumper(t, name, model, qty, threshold, price, dummySupplier);
+            case "RearBumper":
+                return new RearBumper(t, name, model, qty, threshold, price, dummySupplier);
+            default:
+                throw new IllegalArgumentException("Unknown part type selected.");
+        }
+    }
+
 
     private HBox createSummaryFooter() {
         HBox footer = new HBox(20);
@@ -67,16 +191,16 @@ public class CategorizedInventoryView extends VBox {
         footer.setPadding(new Insets(10));
         footer.setStyle("-fx-background-color: #ecf0f1; -fx-border-color: #bdc3c7; -fx-border-width: 1px 0 0 0;");
 
-        Label lblCountTitle = new Label("Total Parts:");
+        Label lblCountTitle = new Label("Total Quantity:");
         lblCountTitle.setFont(Font.font("Arial", FontWeight.BOLD, 14));
         lblTotalCount = new Label("0");
         lblTotalCount.setFont(Font.font("Arial", 14));
 
-        Label lblValueTitle = new Label("Total Inventory Value:");
+        Label lblValueTitle = new Label("Total Value:");
         lblValueTitle.setFont(Font.font("Arial", FontWeight.BOLD, 14));
         lblTotalValue = new Label("PKR 0.00");
         lblTotalValue.setFont(Font.font("Arial", 14));
-        lblTotalValue.setStyle("-fx-text-fill: #27ae60;");
+        lblTotalValue.setStyle("-fx-text-fill: #27ae60;"); // Green for money
 
         footer.getChildren().addAll(lblCountTitle, lblTotalCount, lblValueTitle, lblTotalValue);
         return footer;
@@ -100,7 +224,7 @@ public class CategorizedInventoryView extends VBox {
         container.setPadding(new Insets(0));
 
         Label lblTitle = new Label("Categorized Inventory");
-        lblTitle.setStyle("-fx-font-size: 28px; -fx-font-weight: bold; -fx-padding: 0 0 10 0;");
+        lblTitle.setFont(Font.font("Arial", FontWeight.BOLD, 28));
 
         TabPane categoryTabs = new TabPane();
         categoryTabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
@@ -205,7 +329,7 @@ public class CategorizedInventoryView extends VBox {
         TableView<Part> table = new TableView<>();
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-        // --- FIX: Row Factory for Red Alert ---
+        // Row Factory: Highlight Red if stock <= Threshold
         table.setRowFactory(tv -> new TableRow<Part>() {
             @Override
             protected void updateItem(Part item, boolean empty) {
@@ -213,10 +337,9 @@ public class CategorizedInventoryView extends VBox {
                 if (item == null || empty) {
                     setStyle("");
                 } else if (item.getCurrentStock() <= item.getMinThreshold()) {
-                    // Alert Color: Light Red background if stock is low
                     setStyle("-fx-background-color: #ffcccc;");
                 } else {
-                    setStyle(""); // Default
+                    setStyle("");
                 }
             }
         });
@@ -256,7 +379,7 @@ public class CategorizedInventoryView extends VBox {
                     if (part.getCurrentStock() > 0) {
                         app.updatePartStock(part, -1);
                         getTableView().refresh();
-                        updateSummary(getTableView().getItems()); // Refresh footer
+                        updateSummary(getTableView().getItems());
                     }
                 });
 
@@ -264,7 +387,7 @@ public class CategorizedInventoryView extends VBox {
                     Part part = getTableView().getItems().get(getIndex());
                     app.updatePartStock(part, 1);
                     getTableView().refresh();
-                    updateSummary(getTableView().getItems()); // Refresh footer
+                    updateSummary(getTableView().getItems());
                 });
             }
 
@@ -296,8 +419,6 @@ public class CategorizedInventoryView extends VBox {
                 .collect(Collectors.toList());
 
         inventoryTable.setItems(FXCollections.observableArrayList(filteredList));
-
-        // Update the summary footer whenever data is loaded
         updateSummary(filteredList);
     }
 

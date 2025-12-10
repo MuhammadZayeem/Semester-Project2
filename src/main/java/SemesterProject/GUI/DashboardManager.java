@@ -17,142 +17,108 @@ import java.util.List;
 
 public class DashboardManager {
 
-    private List<Part> masterPartList;
-    private List<Sale> masterSaleList;
+    private List<Part> PartList;
+    private List<Sale> SaleList;
     private DemandManager demandManager;
     private VBox dashboardView;
 
-    // Dashboard Data Fields
-    private int totalStockQuantity; // Total sum of all quantities (Total Parts)
-    private int lowStockItems;
-    private int partsUsedToday; // NEW METRIC: Parts Sold/Used Today
-    private int pendingDemandsCount; // NEW METRIC: Placeholder for pending demand count
+    //------------------------------------------------Show these on dashboard
+    private int totalStockQuantity;  //Total Parts
+    private int lowStockItems;       //low stock items
+    private int partsUsedToday;      // Parts Sold Today
+    private int pendingDemandsCount; // pending demand
 
     // Label references
-    private Label dataLabelTotalStockQuantity;
-    private Label dataLabelLowStock;
-    private Label dataLabelPartsUsedToday;
-    private Label dataLabelPendingDemands;
+    private Label LabelTotalStockQuantity;
+    private Label LabelLowStock;
+    private Label LabelPartsUsedToday;
+    private Label LabelPendingDemands;
 
-    public DashboardManager(List<Part> masterPartList, List<Sale> masterSaleList, DemandManager demandManager) {
-        this.masterPartList = masterPartList;
-        this.masterSaleList = masterSaleList;
+    public DashboardManager(List<Part> PartList, List<Sale> SaleList, DemandManager demandManager) {
+        this.PartList = PartList;
+        this.SaleList = SaleList;
         this.demandManager = demandManager;
-        this.dashboardView = createDashboardLayout(); // Initializes the UI
+       this.dashboardView = createDashboardLayout();
     }
 
-    public void updateDashboardData() {
-        // Recalculate Inventory Metrics
-        totalStockQuantity = masterPartList.stream().mapToInt(Part::getCurrentStock).sum();
-        lowStockItems = (int) masterPartList.stream().filter(p -> p.getCurrentStock() <= p.getMinThreshold()).count();
-
-        // Recalculate Dynamic Metrics
+    public void updateDashboardData() {     //to claculate values
+        totalStockQuantity = PartList.stream().mapToInt(Part::getCurrentStock).sum();
+        lowStockItems = (int) PartList.stream().filter(p -> p.getCurrentStock() <= p.getMinThreshold()).count();
         calculateUsageMetrics();
-        // Placeholder: Assuming DemandManager tracks pending demands
         this.pendingDemandsCount = demandManager.getDemandList().size();
-
-        // Update the UI labels
         updateUI();
     }
 
-    private void calculateUsageMetrics() {
-        // Calculate parts sold/used today
-        LocalDateTime startOfDay = LocalDateTime.now().truncatedTo(ChronoUnit.DAYS);
+    private void calculateUsageMetrics() { //parts sold today
+        LocalDateTime Today = LocalDateTime.now().truncatedTo(ChronoUnit.DAYS);
         partsUsedToday = 0;
-
-        for (Sale sale : masterSaleList) {
-            if (sale.getSaleDateTime() != null && sale.getSaleDateTime().isAfter(startOfDay)) {
-                // Sum the quantity sold for today's usage
+        for (Sale sale : SaleList) {
+            if (sale.getSaleDateTime() != null && sale.getSaleDateTime().isAfter(Today)) {
                 partsUsedToday += sale.getQuantitySold();
             }
         }
     }
 
-    // --- UI Methods ---
 
+    //-----------------------------------------------------------------GUI Methods
     private VBox createDashboardLayout() {
         VBox container = new VBox(20);
         container.setPadding(new Insets(20));
-        container.setStyle("-fx-background-color: #ecf0f1;");
+        container.setStyle("-fx-background-color: lightgray;");
 
-        Label lblTitle = new Label("System Dashboard"); // Title updated to match image
-        lblTitle.setFont(Font.font("Arial", FontWeight.BOLD, 28));
+        Label labelTitle = new Label("System Dashboard"); // Title
+        labelTitle.setFont(Font.font("Arial", FontWeight.BOLD, 28));
 
         GridPane tileGrid = new GridPane();
         tileGrid.setHgap(20);
         tileGrid.setVgap(20);
 
-        // Initialize Data Labels (referenced later in updateUI)
-        dataLabelTotalStockQuantity = createDataLabel(String.valueOf(totalStockQuantity));
-        dataLabelLowStock = createDataLabel(String.valueOf(lowStockItems));
-        dataLabelPartsUsedToday = createDataLabel(String.valueOf(partsUsedToday));
-        dataLabelPendingDemands = createDataLabel(String.valueOf(pendingDemandsCount));
+        LabelTotalStockQuantity = createDataLabel(String.valueOf(totalStockQuantity));
+        LabelLowStock = createDataLabel(String.valueOf(lowStockItems));
+        LabelPartsUsedToday = createDataLabel(String.valueOf(partsUsedToday));
+        LabelPendingDemands = createDataLabel(String.valueOf(pendingDemandsCount));
 
+        //-----------------------------------------------------Tiles layout
+        tileGrid.add(createTile("Total Parts", LabelTotalStockQuantity, "blue"), 0, 0);
+        tileGrid.add(createTile("Low Stock", LabelLowStock, "red"), 1, 0);
+        tileGrid.add(createTile("Today's Usage", LabelPartsUsedToday, "green"), 0, 1);
+        tileGrid.add(createTile("Pending Demands", LabelPendingDemands, "orange"), 1, 1);
 
-        // =========================================================
-        // 4-TILE LAYOUT (Matching Image)
-        // =========================================================
-
-        // 1. Total Parts (Total Stock Quantity)
-        tileGrid.add(createTile("Total Parts", dataLabelTotalStockQuantity, "#3498db"), 0, 0);
-
-        // 2. Low Stock Items
-        tileGrid.add(createTile("Low Stock", dataLabelLowStock, "#e74c3c"), 1, 0);
-
-        // 3. Today's Usage
-        tileGrid.add(createTile("Today's Usage", dataLabelPartsUsedToday, "#2ecc71"), 0, 1);
-
-        // 4. Pending Demands
-        tileGrid.add(createTile("Pending Demands", dataLabelPendingDemands, "#f39c12"), 1, 1);
-
-
-        container.getChildren().addAll(lblTitle, tileGrid);
-
+        container.getChildren().addAll(labelTitle, tileGrid);
         return container;
     }
 
     private void updateUI() {
-        // Update the specific Label references directly.
-        dataLabelTotalStockQuantity.setText(String.valueOf(totalStockQuantity));
-        dataLabelLowStock.setText(String.valueOf(lowStockItems));
-        dataLabelPartsUsedToday.setText(String.valueOf(partsUsedToday));
-        dataLabelPendingDemands.setText(String.valueOf(pendingDemandsCount));
+        LabelTotalStockQuantity.setText(String.valueOf(totalStockQuantity));
+        LabelLowStock.setText(String.valueOf(lowStockItems));
+        LabelPartsUsedToday.setText(String.valueOf(partsUsedToday));
+        LabelPendingDemands.setText(String.valueOf(pendingDemandsCount));
     }
 
-    // Simplified createTile to match the image's simple style
     private VBox createTile(String title, Label dataLabel, String color) {
         VBox tile = new VBox(5);
         tile.setAlignment(Pos.CENTER);
         tile.setPadding(new Insets(15));
-        tile.setPrefSize(180, 100); // Smaller size to fit 4 tiles better
+        tile.setPrefSize(200, 100);
+        tile.setStyle("-fx-background-color: "+color);
 
-        // Apply styling for background and shadow
-        tile.setStyle("-fx-background-color: " + color + "; -fx-border-radius: 10; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 5);");
-
-        Label lblTitle = new Label(title);
-        lblTitle.setFont(Font.font("Arial", 14));
-        lblTitle.setStyle("-fx-text-fill: white;");
-
-        // The data label's color and font
+        Label labelTitle = new Label(title);
+        labelTitle.setFont(Font.font("Arial", 15));
+        labelTitle.setStyle("-fx-text-fill: white;");
         dataLabel.setStyle("-fx-text-fill: white; -fx-font-weight: bold;");
-
-        // Order: Title, then Data
-        tile.getChildren().addAll(lblTitle, dataLabel);
+        tile.getChildren().addAll(labelTitle, dataLabel);
         return tile;
     }
 
     private Label createDataLabel(String data) {
-        Label lblData = new Label(data);
-        lblData.setFont(Font.font("Arial", FontWeight.BOLD, 30));
-        return lblData;
+        Label labelData = new Label(data);
+        labelData.setFont(Font.font("Arial", FontWeight.BOLD, 30));
+        return labelData;
     }
 
     public VBox getView() {
         updateDashboardData();
         return dashboardView;
     }
-
-    public List<Sale> getSalesList() {
-        return masterSaleList;
-    }
+    public List<Sale> getSalesList() {return SaleList;}
 }
