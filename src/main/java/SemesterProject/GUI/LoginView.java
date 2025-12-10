@@ -9,7 +9,6 @@ import javafx.scene.text.FontWeight;
 
 public class LoginView extends VBox {
 
-    // Main VBox container to switch between login and reset views
     private VBox loginContainer;
     private VBox resetContainer;
     private MainApp app;
@@ -21,20 +20,19 @@ public class LoginView extends VBox {
         this.setSpacing(15);
         this.setStyle("-fx-background-color: #f0f2f5;");
 
-        // Initialize the two main views
         loginContainer = createLoginContainer();
         resetContainer = createResetContainer();
         resetContainer.setVisible(false);
-        resetContainer.setManaged(false); // Hide and remove from layout
+        resetContainer.setManaged(false);
 
         this.getChildren().addAll(loginContainer, resetContainer);
     }
 
-    // --- Login Container (Original GUI) ---
+    // --------------------------------------------------------------Login Container
     private VBox createLoginContainer() {
         VBox container = new VBox(15);
         container.setAlignment(Pos.CENTER);
-        container.setPadding(new Insets(0)); // No extra padding
+        container.setPadding(new Insets(0));
 
         Label title = new Label("System Login");
         title.setFont(Font.font("Arial", FontWeight.BOLD, 24));
@@ -47,11 +45,12 @@ public class LoginView extends VBox {
         txtPass.setPromptText("Password");
         txtPass.setMaxWidth(250);
 
+        //--------------------------------------------------login button
         Button btnLogin = new Button("Login");
-        btnLogin.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;");
+        btnLogin.setStyle("-fx-background-color: blue; -fx-text-fill: white; -fx-font-weight: bold;");
         btnLogin.setPrefWidth(250);
 
-        // ADDED: Forgot Password Link
+        // -----------------------------------------------------------Forgot Password
         Hyperlink linkForgot = new Hyperlink("Forgot Password?");
         linkForgot.setStyle("-fx-font-size: 11px; -fx-text-fill: #3498db;");
 
@@ -66,13 +65,11 @@ public class LoginView extends VBox {
             }
         });
 
-        // Action for Forgot Password Link
+        // Action for Forgot Password
         linkForgot.setOnAction(e -> {
-            toggleView(false); // Switch to reset view
-            lblError.setText(""); // Clear any previous error
+            toggleView(false);
+            lblError.setText("");
         });
-
-        // The order is important to maintain the look of the original GUI
         container.getChildren().addAll(title, txtUser, txtPass, btnLogin, linkForgot, lblError);
         return container;
     }
@@ -91,11 +88,11 @@ public class LoginView extends VBox {
         txtUser.setMaxWidth(250);
 
         Button btnRequest = new Button("Request Reset");
-        btnRequest.setStyle("-fx-background-color: #e67e22; -fx-text-fill: white; -fx-font-weight: bold;");
+        btnRequest.setStyle("-fx-background-color: blue; -fx-text-fill: white; -fx-font-weight: bold;");
         btnRequest.setPrefWidth(250);
 
         Hyperlink linkBack = new Hyperlink("Back to Login");
-        linkBack.setStyle("-fx-font-size: 11px; -fx-text-fill: #3498db;");
+        linkBack.setStyle("-fx-font-size: 11px; -fx-text-fill: red;");
 
         Label lblStatus = new Label();
 
@@ -107,24 +104,22 @@ public class LoginView extends VBox {
                 lblStatus.setText("Username cannot be empty.");
                 return;
             }
-
-            // Call the MainApp method which delegates to LoginManager
             String resultMessage = app.requestPasswordReset(username);
 
             // Set style based on success or failure message
             if (resultMessage.contains("not found") || resultMessage.contains("Only Staff") || resultMessage.contains("already exists")) {
                 lblStatus.setStyle("-fx-text-fill: red;");
             } else {
-                lblStatus.setStyle("-fx-text-fill: #27ae60;"); // Green for success/pending
+                lblStatus.setStyle("-fx-text-fill: green;");
             }
             lblStatus.setText(resultMessage);
             txtUser.clear();
         });
 
-        // Action for Back Link
+        //-----------------------------------------------------Action for Back Link
         linkBack.setOnAction(e -> {
-            toggleView(true); // Switch to login view
-            lblStatus.setText(""); // Clear status
+            toggleView(true);
+            lblStatus.setText("");
             txtUser.clear();
         });
 
@@ -132,16 +127,13 @@ public class LoginView extends VBox {
         return container;
     }
 
-    // Helper method to toggle between the two VBoxes
+    //----------------------------------------------Helper method to toggle between the two Boxes
     private void toggleView(boolean showLogin) {
         if (showLogin) {
             loginContainer.setVisible(true);
             loginContainer.setManaged(true);
             resetContainer.setVisible(false);
             resetContainer.setManaged(false);
-            // Since the title label is outside the containers, we can't change it easily.
-            // If the size is adjusted in the container, the MainApp's scene size might need adjustment.
-            // For now, we rely on the VBox to manage the space for the visible view.
         } else {
             loginContainer.setVisible(false);
             loginContainer.setManaged(false);

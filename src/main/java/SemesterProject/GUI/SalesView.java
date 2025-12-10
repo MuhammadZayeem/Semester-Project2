@@ -32,29 +32,22 @@ public class SalesView extends VBox {
         table.setEditable(false);
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-        // Columns
+        //-----------------------------------------------------Columns of tablw
 
-        // FIX: Replaced getTimestamp() with getFormattedSaleDate()
         TableColumn<Sale, String> colDate = new TableColumn<>("Date & Time");
         colDate.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getFormattedSaleDate()));
         colDate.setPrefWidth(200);
-
-        // FIX: Replaced getPart() with getPartName()
         TableColumn<Sale, String> colPart = new TableColumn<>("Part Name");
         colPart.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getPartName()));
-
-        // FIX: Replaced getQuantityUsed() with getQuantitySold()
         TableColumn<Sale, String> colQuantity = new TableColumn<>("Quantity Sold");
         colQuantity.setCellValueFactory(data -> new SimpleStringProperty(String.valueOf(data.getValue().getQuantitySold())));
         colQuantity.setStyle("-fx-alignment: CENTER;");
-
-        // FIX: Replaced getTotalAmount() with getCost() and formatted as currency
         TableColumn<Sale, String> colCost = new TableColumn<>("Total Cost");
         colCost.setCellValueFactory(data -> new SimpleStringProperty(String.format("$%.2f", data.getValue().getCost())));
+
         colCost.setStyle("-fx-alignment: CENTER-RIGHT; -fx-font-weight: bold;");
 
         table.getColumns().addAll(colDate, colPart, colQuantity, colCost);
-
         this.getChildren().addAll(lblHeader, table);
         refreshTable();
     }
