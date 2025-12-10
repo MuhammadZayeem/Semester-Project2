@@ -80,7 +80,7 @@ public class DemandView extends VBox {
 
     public void refreshTable() {
         try {
-            // Using reflection to access the private list in DemandManager (as per your provided code structure)
+            // Using reflection to access the private list in DemandManager (as per our provided code structure)
             Field f = DemandManager.class.getDeclaredField("demandList");
             f.setAccessible(true);
             ArrayList<DemandItem> list = (ArrayList<DemandItem>) f.get(demandManager);

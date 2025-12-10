@@ -49,7 +49,7 @@ public class InventoryView extends VBox {
         colMin.setCellValueFactory(data -> new SimpleStringProperty(String.valueOf(data.getValue().getMinThreshold())));
 
         TableColumn<Part, String> colPrice = new TableColumn<>("Unit Price");
-        colPrice.setCellValueFactory(data -> new SimpleStringProperty(String.format("$%.2f", data.getValue().getUnitPrice())));
+        colPrice.setCellValueFactory(data -> new SimpleStringProperty(String.format("R%.2f", data.getValue().getUnitPrice())));
         colPrice.setStyle("-fx-alignment: CENTER-RIGHT;");
 
         table.getColumns().addAll(colName, colModel, colStock, colMin, colPrice);

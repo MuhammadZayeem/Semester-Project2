@@ -46,7 +46,7 @@ public abstract class Part {
     public String getPartId() { return partId; }
     public void setPartId(String partId) { this.partId = partId; }
     public void setCurrentStock(int quantity) { this.quantity = quantity; }
-    //public void setThreshold(int threshold) { this.threshold = threshold; }
+    public void setThreshold(int threshold) { this.threshold = threshold; }
     public void setUnitPrice(double unitPrice) { this.unitPrice = unitPrice; }
     public void setSupplier(Supplier supplier) { this.supplier = supplier; }
 }
