@@ -1,29 +1,21 @@
 package SemesterProject.GUI;
-
-// FIX: Ensure all necessary imports are present for the database architecture
 import SemesterProject.Login.Admin;
 import SemesterProject.Login.PasswordResetRequest;
 import SemesterProject.Login.Staff;
 import SemesterProject.Login.UserRoles;
 import SemesterProject.User;
 import SemesterProject.Exception.UserAlreadyExistsException;
-import SemesterProject.Exception.UserNotFoundException;
-
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import java.util.ArrayList;
 import java.util.List;
-import java.sql.SQLException;
 
 public class UserManagementView extends VBox {
 
@@ -32,7 +24,6 @@ public class UserManagementView extends VBox {
     private MainApp app;
     private Admin adminUser;
 
-    // Status label for feedback
     private Label lblStatus;
 
     public UserManagementView(MainApp app, User currentUser) {
@@ -61,33 +52,21 @@ public class UserManagementView extends VBox {
         );
 
         this.getChildren().addAll(lblHeader, lblStatus, tabPane);
-
-        // Initial table load
         refreshUserTable();
         refreshResetTable();
     }
-
-    // ===============================================
-    // TAB 1: REGISTERED USERS
-    // ===============================================
     private Tab createUserManagementTab() {
         userTable = new TableView<>();
 
-        // Columns Setup
+        //--------------------------------------------------------------Columns
         TableColumn<User, String> colID = new TableColumn<>("ID");
         colID.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getUserId()));
 
         TableColumn<User, String> colUser = new TableColumn<>("Username");
         colUser.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getUsername()));
-
-        // --- REMOVED COLUMN (Full Name) ---
-        // TableColumn<User, String> colName = new TableColumn<>("Full Name");
-        // colName.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getFullName()));
-
         TableColumn<User, String> colRole = new TableColumn<>("Role");
         colRole.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getRole().name()));
 
-        // Only include ID, Username, and Role
         userTable.getColumns().addAll(colID, colUser, colRole);
         userTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
@@ -103,7 +82,7 @@ public class UserManagementView extends VBox {
         return userTab;
     }
 
-    // UI for Admin Actions - CLARIFIED LAYOUT
+    // -----------------------------------------------------------GUI for Admin Actions
     private VBox createAdminActionBox() {
         VBox container = new VBox(15);
         container.setStyle("-fx-border-color: #bdc3c7; -fx-border-radius: 5; -fx-padding: 15;");
@@ -112,7 +91,7 @@ public class UserManagementView extends VBox {
         actionTitle.setFont(Font.font("Arial", FontWeight.BOLD, 14));
         container.getChildren().add(actionTitle);
 
-        // --- 1. Add New User Section ---
+        //---------------------------------------------------Add New User
         VBox addUserBox = new VBox(5);
         addUserBox.setStyle("-fx-padding: 10; -fx-background-color: #d1f2eb; -fx-border-radius: 3;");
 
@@ -124,10 +103,6 @@ public class UserManagementView extends VBox {
 
         PasswordField txtNewPass = new PasswordField();
         txtNewPass.setPromptText("Password (required)");
-
-        // Retain placeholders for data integrity when creating the User object
-        // Full Name and Contact Number fields were removed from the GUI.
-
         TextField txtNewName = new TextField();
         TextField txtNewContact = new TextField();
 
@@ -139,7 +114,6 @@ public class UserManagementView extends VBox {
         btnAddUser.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold;");
         btnAddUser.setMaxWidth(Double.MAX_VALUE);
 
-        // Layout the fields (Simplified layout)
         GridPane grid = new GridPane();
         grid.setVgap(10);
         grid.setHgap(10);
@@ -148,37 +122,31 @@ public class UserManagementView extends VBox {
         grid.addRow(1, new Label("Password:"), txtNewPass);
         grid.addRow(2, new Label("Role:"), cmbRole);
 
-        // --- Save Action ---
+        //----------------------------------------------------Save Action
         btnAddUser.setOnAction(e -> {
             String username = txtNewUser.getText().trim();
             String password = txtNewPass.getText();
             UserRoles role = cmbRole.getValue();
-
-            // Validation: Only check mandatory fields (Username, Password, Role)
             if (username.isEmpty() || password.isEmpty() || role == null) {
                 lblStatus.setText("Error: Username, Password, and Role are required.");
                 lblStatus.setStyle("-fx-text-fill: red;");
                 return;
             }
-
             try {
                 User newUser;
-                // Pass default strings for the missing GUI fields to satisfy the constructor:
                 String defaultName = username + " User";
                 String defaultContact = "N/A";
-
                 if (role == UserRoles.ADMIN) {
                     newUser = new Admin(null, username, password);
                 } else {
                     newUser = new Staff(null, username, password, defaultName, defaultContact);
                 }
-
-                adminUser.addUser(app, newUser); // Delegates to MainApp
+                adminUser.addUser(app, newUser);
                 lblStatus.setText("User '" + username + "' added successfully as " + role + ".");
                 lblStatus.setStyle("-fx-text-fill: #27ae60;");
-                refreshUserTable(); // Refresh table to show new user from DB
+                refreshUserTable();
 
-                // Clear inputs
+            //--------------------------------------Inputs
                 txtNewUser.clear(); txtNewPass.clear(); cmbRole.getSelectionModel().clearSelection();
             } catch (UserAlreadyExistsException ex) {
                 lblStatus.setText("Error adding user: " + ex.getMessage());
@@ -192,7 +160,7 @@ public class UserManagementView extends VBox {
         addUserBox.getChildren().addAll(lblAdd, grid, btnAddUser);
         container.getChildren().add(addUserBox);
 
-        // --- 2. Remove User Section ---
+        //-------------------------------------------------------------------Remove User
         VBox removeBoxContainer = new VBox(5);
         removeBoxContainer.setStyle("-fx-padding: 10 0 10 0; -fx-border-width: 1 0 1 0; -fx-border-color: #bdc3c7;");
         Label lblRemove = new Label("2. Remove User:");
@@ -210,7 +178,7 @@ public class UserManagementView extends VBox {
                 adminUser.removeUser(app, txtRemoveUser.getText().trim());
                 lblStatus.setText("User '" + txtRemoveUser.getText().trim() + "' removed successfully.");
                 lblStatus.setStyle("-fx-text-fill: #27ae60;");
-                refreshUserTable(); // Refresh table to show removed user
+                refreshUserTable();
                 txtRemoveUser.clear();
             } catch (Exception ex) {
                 lblStatus.setText("Error removing user: " + ex.getMessage());
@@ -222,7 +190,7 @@ public class UserManagementView extends VBox {
         container.getChildren().add(removeBoxContainer);
 
 
-        // --- 3. Reset Password Section (Direct Admin Reset) ---
+        //----------------------------------------------------------------Reset Password
         VBox resetBoxContainer = new VBox(5);
         Label lblReset = new Label("3. Direct Password Reset:");
         lblReset.setFont(Font.font("Arial", FontWeight.BOLD, 12));
@@ -247,7 +215,7 @@ public class UserManagementView extends VBox {
                 return;
             }
 
-            adminUser.resetUserPassword(app, username, newPass); // Delegates to MainApp
+            adminUser.resetUserPassword(app, username, newPass);
 
             lblStatus.setText("Password reset initiated for '" + username + "'. Check console for status.");
             lblStatus.setStyle("-fx-text-fill: #27ae60;");
@@ -261,10 +229,7 @@ public class UserManagementView extends VBox {
         return container;
     }
 
-
-    // ===============================================
-    // TAB 2: PASSWORD RESET REQUESTS
-    // ===============================================
+    //-------------------------------------------------------- TAB 2: PASSWORD RESET REQUESTS
     private Tab createResetRequestTab() {
         resetTable = new TableView<>();
 
@@ -309,11 +274,7 @@ public class UserManagementView extends VBox {
         return resetTab;
     }
 
-    // ===============================================
-    // HELPER METHODS
-    // ===============================================
-
-    // Dialog to prompt Admin for a new password
+    // HELPER METHODs
     private void promptForNewPassword(String staffUsername) {
         Dialog<String> dialog = new Dialog<>();
         dialog.setTitle("Approve Password Reset");
@@ -350,19 +311,11 @@ public class UserManagementView extends VBox {
             }
         });
     }
-
-    /**
-     * Retrieves all active users from the DB via MainApp and updates the table.
-     */
     public void refreshUserTable() {
         List<User> activeUsers = app.getActiveUsersList(); // Fetch data from DB
         ObservableList<User> data = FXCollections.observableArrayList(activeUsers);
         userTable.setItems(data);
     }
-
-    /**
-     * Retrieves all pending password reset requests from LoginManager and updates the table.
-     */
     public void refreshResetTable() {
         List<PasswordResetRequest> requests = app.getPendingPasswordResetRequests();
         ObservableList<PasswordResetRequest> data = FXCollections.observableArrayList(requests);

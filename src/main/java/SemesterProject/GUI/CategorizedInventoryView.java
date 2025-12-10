@@ -7,12 +7,10 @@ import SemesterProject.Body.RearGlass;
 import SemesterProject.Body.DoorGlass;
 import SemesterProject.Body.FrontBumper;
 import SemesterProject.Body.RearBumper;
-import SemesterProject.Supplier.LocalSupplier;
 import SemesterProject.Supplier.Supplier;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -46,7 +44,7 @@ public class CategorizedInventoryView extends VBox {
     private Label lblTotalCount;
     private Label lblTotalValue;
 
-    private VBox addPartFormContainer; // Container for the collapsible form
+    private VBox addPartFormContainer;
 
     public CategorizedInventoryView(List<Part> masterPartList, MainApp app) {
         this.masterPartList = masterPartList;
@@ -80,9 +78,6 @@ public class CategorizedInventoryView extends VBox {
         loadInventoryDataBySpecificType("Front Laminated");
     }
 
-    /**
-     * Creates the collapsible form for adding a new part.
-     */
     private VBox createAddPartForm() {
         VBox container = new VBox(10);
         container.setPadding(new Insets(15));
@@ -95,14 +90,14 @@ public class CategorizedInventoryView extends VBox {
         grid.setVgap(10);
         grid.setHgap(10);
 
-        // Input Fields
+        //-------------------------Input Fields
         TextField txtName = new TextField(); txtName.setPromptText("Part Name (e.g., FLG)");
         TextField txtModel = new TextField(); txtModel.setPromptText("Car Model (e.g., Corolla 2022)");
         TextField txtPrice = new TextField(); txtPrice.setPromptText("Unit Price");
         TextField txtQty = new TextField(); txtQty.setPromptText("Initial Quantity");
         TextField txtThreshold = new TextField(); txtThreshold.setPromptText("Min Threshold (e.g., 5)");
 
-        // ComboBox for Part Type selection
+        //---------------------------ComboBox for Part Type
         ComboBox<String> cmbType = new ComboBox<>(FXCollections.observableArrayList(
                 "FrontLaminatedGlass", "FrontGlass", "RearGlass", "DoorGlass", "FrontBumper", "RearBumper"
         ));
@@ -119,7 +114,7 @@ public class CategorizedInventoryView extends VBox {
 
         container.getChildren().addAll(lblTitle, grid, btnSave);
 
-        // --- Save Action ---
+        // ----------------------Save Action
         btnSave.setOnAction(e -> {
             try {
                 String name = txtName.getText();
@@ -133,16 +128,9 @@ public class CategorizedInventoryView extends VBox {
                     throw new IllegalArgumentException("Name, Model, and Type are required.");
                 }
 
-                // 1. Instantiate the correct part class
                 Part newPart = createNewPartInstance(type, name, model, qty, threshold, price);
-
-                // 2. Delegate saving to MainApp
                 app.addUserPart(newPart);
-
-                // 3. Success Feedback and Refresh
                 new Alert(Alert.AlertType.INFORMATION, "Part saved successfully!").showAndWait();
-
-                // 4. Clear fields and refresh the display
                 txtName.clear(); txtModel.clear(); txtPrice.clear(); txtQty.clear(); txtThreshold.clear(); cmbType.getSelectionModel().clearSelection();
                 refreshTable();
 
@@ -158,16 +146,12 @@ public class CategorizedInventoryView extends VBox {
         return container;
     }
 
-    /**
-     * Factory method to create the specific Part subclass instance.
-     */
     private Part createNewPartInstance(String type, String name, String model, int qty, int threshold, double price) {
-        String t = null; // Temp ID (DBManager generates the final ID)
-        Supplier dummySupplier = app.getMockSupplier(); // Get dummy supplier from MainApp
+        String t = null;
+        Supplier dummySupplier = app.getMockSupplier();
 
         switch (type) {
             case "FrontLaminatedGlass":
-                // Using 7-argument constructor (including Supplier)
                 return new FrontLaminatedGlass(t, name, model, qty, threshold, price, dummySupplier);
             case "FrontGlass":
                 return new FrontGlass(t, name, model, qty, threshold, price, dummySupplier);
@@ -209,12 +193,10 @@ public class CategorizedInventoryView extends VBox {
     private void updateSummary(List<Part> displayedParts) {
         int count = 0;
         double value = 0.0;
-
         for (Part p : displayedParts) {
             count += p.getCurrentStock();
             value += (p.getCurrentStock() * p.getUnitPrice());
         }
-
         lblTotalCount.setText(String.valueOf(count));
         lblTotalValue.setText(String.format("PKR %.2f", value));
     }
@@ -328,8 +310,6 @@ public class CategorizedInventoryView extends VBox {
     private TableView<Part> createInventoryTable() {
         TableView<Part> table = new TableView<>();
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-
-        // Row Factory: Highlight Red if stock <= Threshold
         table.setRowFactory(tv -> new TableRow<Part>() {
             @Override
             protected void updateItem(Part item, boolean empty) {
@@ -346,22 +326,17 @@ public class CategorizedInventoryView extends VBox {
 
         TableColumn<Part, String> colName = new TableColumn<>("Name");
         colName.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getName()));
-
         TableColumn<Part, String> colModel = new TableColumn<>("Car Model");
         colModel.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getCarModel()));
-
         TableColumn<Part, String> colPrice = new TableColumn<>("Unit Price");
         colPrice.setCellValueFactory(data -> new SimpleStringProperty(String.format("%.2f", data.getValue().getUnitPrice())));
         colPrice.setStyle("-fx-alignment: CENTER-RIGHT;");
-
         TableColumn<Part, Number> colQty = new TableColumn<>("Qty");
         colQty.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getCurrentStock()));
         colQty.setStyle("-fx-alignment: CENTER;");
-
         TableColumn<Part, String> colTotal = new TableColumn<>("Total Value");
         colTotal.setCellValueFactory(data -> new SimpleStringProperty(String.format("%.2f", data.getValue().getUnitPrice() * data.getValue().getCurrentStock())));
         colTotal.setStyle("-fx-alignment: CENTER-RIGHT;");
-
         TableColumn<Part, Void> colActions = new TableColumn<>("Update Stock");
         colActions.setPrefWidth(120);
         colActions.setStyle("-fx-alignment: CENTER;");

@@ -81,7 +81,7 @@ public class DashboardManager {
         //-----------------------------------------------------Tiles layout
         tileGrid.add(createTile("Total Parts", LabelTotalStockQuantity, "blue"), 0, 0);
         tileGrid.add(createTile("Low Stock", LabelLowStock, "red"), 1, 0);
-        tileGrid.add(createTile("Today's Usage", LabelPartsUsedToday, "green"), 0, 1);
+        tileGrid.add(createTile("Sold Parts", LabelPartsUsedToday, "green"), 0, 1);
         tileGrid.add(createTile("Pending Demands", LabelPendingDemands, "orange"), 1, 1);
 
         container.getChildren().addAll(labelTitle, tileGrid);
