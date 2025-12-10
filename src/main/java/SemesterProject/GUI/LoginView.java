@@ -9,7 +9,6 @@ import javafx.scene.text.FontWeight;
 
 public class LoginView extends VBox {
 
-    // Main VBox container to switch between login and reset views
     private VBox loginContainer;
     private VBox resetContainer;
     private MainApp app;
@@ -21,7 +20,6 @@ public class LoginView extends VBox {
         this.setSpacing(15);
         this.setStyle("-fx-background-color: #f0f2f5;");
 
-        // Initialize the two main views
         loginContainer = createLoginContainer();
         resetContainer = createResetContainer();
         resetContainer.setVisible(false);
