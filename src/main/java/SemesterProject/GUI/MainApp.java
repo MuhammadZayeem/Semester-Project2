@@ -2,6 +2,7 @@ package SemesterProject.GUI;
 
 import SemesterProject.Body.*;
 import SemesterProject.Exception.UserCreationException;
+//import SemesterProject.InventoryManagment.InventoryManager;
 import SemesterProject.Login.Admin;
 import SemesterProject.Login.LoginManager;
 import SemesterProject.Data;
@@ -10,6 +11,7 @@ import SemesterProject.Sales.Sale;
 import SemesterProject.User;
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 import SemesterProject.Demand.DemandManager;
 import SemesterProject.Login.PasswordResetRequest;
@@ -46,7 +48,7 @@ public class MainApp extends Application {
     private void initializeData() throws UserCreationException {
         dbManager = new Data();
         loginManager = new LoginManager(dbManager);
-        //inventoryManager = new InventoryManager(dbManager);
+      //  inventoryManager = new InventoryManager(dbManager);
         demandManager = new DemandManager();
         loadAndPopulateData();
     }
@@ -65,7 +67,7 @@ public class MainApp extends Application {
         }
         masterSaleList.clear();
         masterSaleList.addAll(dbManager.getAllSales());
-        //inventoryManager.getInventory().clear();
+       // inventoryManager.getInventory().clear();
         //inventoryManager.getInventory().addAll(masterPartList);
         demandManager.addDemands(masterPartList);
     }
@@ -140,7 +142,7 @@ public class MainApp extends Application {
     // ACTIONS
     // =================================================================================
 
- /*   public void addUserPart(Part newPart) throws Exception {
+  /*  public void addUserPart(Part newPart) throws Exception {
         dbManager.addPart(newPart);
         masterPartList.add(newPart);
         inventoryManager.getInventory().add(newPart);
@@ -148,15 +150,16 @@ public class MainApp extends Application {
         dashboardManager.updateDashboardData();
     }*/
 
-    public void increaseStock(Part part) {
+  /*  public void increaseStock(Part part) {
         try {
             int newStock = part.getCurrentStock() + 1;
             part.setCurrentStock(newStock);
+            inventoryManager.updateStock(part, 1);
             demandManager.addDemands(masterPartList);
             dashboardManager.updateDashboardData();
         } catch (Exception e) {}
     }
-
+*/
     public void recordSale(Part part) {
         try {
             int newStock = part.getCurrentStock() - 1;
