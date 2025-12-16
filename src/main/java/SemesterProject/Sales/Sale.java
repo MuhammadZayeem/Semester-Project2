@@ -1,5 +1,4 @@
 package SemesterProject.Sales;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -15,18 +14,6 @@ public class Sale {
         this.quantitySold = quantitySold;
         this.cost = cost;
         this.saleDateTime = LocalDateTime.now();
-    }
-
-    //Constructor for database with time
-    public Sale(String partName, int quantitySold, double cost, Timestamp time) {
-        this.partName = partName;
-        this.quantitySold = quantitySold;
-        this.cost = cost;
-        if (time != null) {
-            this.saleDateTime = time.toLocalDateTime();
-        } else {
-            this.saleDateTime = LocalDateTime.now();
-        }
     }
 
     public String getPartName() {return partName;}

@@ -1,25 +1,21 @@
 package SemesterProject.Login;
+import SemesterProject.Data;
 import SemesterProject.User;
-import SemesterProject.Exception.UserAlreadyExistsException;
 import SemesterProject.Exception.UserNotFoundException;
 import SemesterProject.GUI.MainApp;
 
 public class Admin extends User {
-
+     Data data;
     public Admin(String userId, String username, String password) {
         super(userId, username, password, UserRoles.ADMIN);
     }
 
     @Override
-    public String getPassword() {
-        return super.getPassword();
-    }
-    public void addUser(MainApp app, User newUser) throws Exception {
-        app.addUser(newUser);
-    }
+    public String getPassword() {return super.getPassword();}
+    public void addUser(User newUser) throws Exception {}
 
-    public void removeUser(MainApp app, String username) throws UserNotFoundException {
-        app.removeUser(username);
+    public boolean RemoveUser(MainApp app, String username) throws UserNotFoundException {
+        return data.removeUser(username);
     }
 
     /*public void updateUserDetails(MainApp app, String targetUsername, String newUsername, String newFullName) throws UserNotFoundException, UserAlreadyExistsException {

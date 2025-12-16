@@ -245,7 +245,7 @@ public class UserManagementView extends StackPane {
 
         btnRemove.setOnAction(e -> {
             try {
-                adminUser.removeUser(app, txtUser.getText().trim());
+                adminUser.RemoveUser(app, txtUser.getText().trim());
                 lblStatus.setText("User removed: " + txtUser.getText());
                 lblStatus.setStyle("-fx-text-fill: green;");
                 txtUser.clear();
@@ -297,7 +297,7 @@ public class UserManagementView extends StackPane {
                 } else {
                     newUser = new Staff(null, txtUser.getText(), txtPass.getText());
                 }
-                adminUser.addUser(app, newUser);
+                adminUser.addUser(newUser);
                 lblStatus.setText("User created successfully!");
                 lblStatus.setStyle("-fx-text-fill: green;");
                 txtUser.clear(); txtPass.clear(); cmbRole.getSelectionModel().clearSelection();

@@ -31,7 +31,7 @@ public abstract class User {
         this.username = newUsername;
     }
 
-    // ADDED THIS to make password reset simple
+    //Password Reset
     public void setPassword(String newPassword) {
         this.password = newPassword;
     }

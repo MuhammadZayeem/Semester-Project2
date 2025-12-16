@@ -30,7 +30,6 @@ public class LoginManager {
             return null;
         }
     }
-
     // --------------------------------------------------------FIND USER
     public User findUser(String username) {
         return dbManager.findUserByUsername(username);
