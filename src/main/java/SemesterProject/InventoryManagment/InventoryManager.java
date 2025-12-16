@@ -1,3 +1,4 @@
+/*
 package SemesterProject.InventoryManagment;
 
 import SemesterProject.Part;
@@ -16,14 +17,16 @@ public class InventoryManager {
     }
 
     // Default constructor
-   /* public InventoryManager() {
+   */
+/* public InventoryManager() {
         this.inventory = new ArrayList<>();
         this.dbManager = null;
-    }*/
+    }*//*
+
 
 
     public List<Part> getInventory() {
 
         return inventory;
     }
-}
+}*/

@@ -2,7 +2,7 @@ package SemesterProject.GUI;
 
 import SemesterProject.Body.*;
 import SemesterProject.Exception.UserCreationException;
-import SemesterProject.InventoryManagment.InventoryManager;
+//import SemesterProject.InventoryManagment.InventoryManager;
 import SemesterProject.Login.Admin;
 import SemesterProject.Login.LoginManager;
 import SemesterProject.Data;
@@ -28,7 +28,7 @@ public class MainApp extends Application {
     private User currentUser;
 
     // Managers
-    private InventoryManager inventoryManager;
+    //private InventoryManager inventoryManager;
     private DemandManager demandManager;
     private DashboardManager dashboardManager;
     private LoginManager loginManager;
@@ -48,7 +48,7 @@ public class MainApp extends Application {
     private void initializeData() throws UserCreationException {
         dbManager = new Data();
         loginManager = new LoginManager(dbManager);
-        inventoryManager = new InventoryManager(dbManager);
+      //  inventoryManager = new InventoryManager(dbManager);
         demandManager = new DemandManager();
         loadAndPopulateData();
     }
@@ -67,8 +67,8 @@ public class MainApp extends Application {
         }
         masterSaleList.clear();
         masterSaleList.addAll(dbManager.getAllSales());
-        inventoryManager.getInventory().clear();
-        inventoryManager.getInventory().addAll(masterPartList);
+       // inventoryManager.getInventory().clear();
+        //inventoryManager.getInventory().addAll(masterPartList);
         demandManager.addDemands(masterPartList);
     }
 
