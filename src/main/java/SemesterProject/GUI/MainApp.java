@@ -69,7 +69,7 @@ public class MainApp extends Application {
         masterSaleList.addAll(dbManager.getAllSales());
         inventoryManager.getInventory().clear();
         inventoryManager.getInventory().addAll(masterPartList);
-        demandManager.generateAutoDemands(masterPartList);
+        demandManager.addDemands(masterPartList);
     }
 
     private int getRandomStock() {
@@ -128,7 +128,7 @@ public class MainApp extends Application {
     }
 
     public void showDemandList() {
-        demandManager.generateAutoDemands(masterPartList);
+        demandManager.addDemands(masterPartList);
         DemandView view = new DemandView(this, demandManager);
         primaryStage.getScene().setRoot(view);
     }
@@ -142,24 +142,24 @@ public class MainApp extends Application {
     // ACTIONS
     // =================================================================================
 
-    public void addUserPart(Part newPart) throws Exception {
+  /*  public void addUserPart(Part newPart) throws Exception {
         dbManager.addPart(newPart);
         masterPartList.add(newPart);
         inventoryManager.getInventory().add(newPart);
-        demandManager.generateAutoDemands(masterPartList);
+        demandManager.addDemands(masterPartList);
         dashboardManager.updateDashboardData();
-    }
+    }*/
 
-    public void increaseStock(Part part) {
+  /*  public void increaseStock(Part part) {
         try {
             int newStock = part.getCurrentStock() + 1;
             part.setCurrentStock(newStock);
             inventoryManager.updateStock(part, 1);
-            demandManager.generateAutoDemands(masterPartList);
+            demandManager.addDemands(masterPartList);
             dashboardManager.updateDashboardData();
         } catch (Exception e) {}
     }
-
+*/
     public void recordSale(Part part) {
         try {
             int newStock = part.getCurrentStock() - 1;
@@ -171,8 +171,7 @@ public class MainApp extends Application {
             masterSaleList.add(newSale);
 
             part.setCurrentStock(newStock);
-            inventoryManager.updateStock(part, -1);
-            demandManager.generateAutoDemands(masterPartList);
+            demandManager.addDemands(masterPartList);
             dashboardManager.updateDashboardData();
 
         } catch (Exception e) {

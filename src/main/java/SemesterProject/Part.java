@@ -34,8 +34,6 @@ public abstract class Part {
 
     //----------------------------------------------------------------------------Getters & Setters
     public String getName() { return name; }
-    public String getCategory() { return category; }
-    public String getCarModel() { return carChasis; }
     public int getCurrentStock() { return quantity; }
     public int getMinThreshold() { return threshold; }
     public double getUnitPrice() { return unitPrice; }

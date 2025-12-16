@@ -15,6 +15,7 @@ public class Data {
     private List<Sale> sales;
 
     public Data() throws UserCreationException {
+
         this.users = new ArrayList<>();
         this.parts = new ArrayList<>();
         this.sales = new ArrayList<>();
@@ -43,6 +44,7 @@ public class Data {
     }
 
     public List<User> getAllUsers() {
+
         return new ArrayList<>(users);
     }
 
@@ -113,10 +115,7 @@ public class Data {
         parts.add(part);
     }
 
-    public void updatePart(Part part) {
-        // In-memory update is implicit via reference
-        System.out.println("Part updated: " + part.getName());
-    }
+
 
     public void clearAllPartsData() {
         parts.clear();
@@ -125,7 +124,9 @@ public class Data {
 
     // --- SALES ---
 
-    public List<Sale> getAllSales() { return new ArrayList<>(sales); }
+    public List<Sale> getAllSales() {
+        return new ArrayList<>(sales);
+    }
 
     public void addSale(Sale sale, String partId, String userId) {
         sales.add(sale);

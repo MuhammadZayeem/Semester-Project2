@@ -11,17 +11,18 @@ public class DemandManager {
         this.demandList = new ArrayList<>();
     }
 
-    public void generateAutoDemands(List<Part> Inventory) {
+    public void addDemands(List<Part> Inventory) {
         demandList.clear();
         for (Part p : Inventory) {
             if (p.getCurrentStock() <= p.getMinThreshold()) {
                 int orderQty = (p.getMinThreshold() - p.getCurrentStock()) + 5;
-                demandList.add(new DemandItem(p, orderQty, true));
+                demandList.add(new DemandItem(p, orderQty));
             }
         }
     }
 
-    public ArrayList<DemandItem> getDemandList() {
+    public ArrayList<DemandItem> getDemandList()
+    {
         return demandList;
     }
 }

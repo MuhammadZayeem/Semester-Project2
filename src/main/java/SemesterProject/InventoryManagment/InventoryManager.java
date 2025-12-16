@@ -16,23 +16,14 @@ public class InventoryManager {
     }
 
     // Default constructor
-    public InventoryManager() {
+   /* public InventoryManager() {
         this.inventory = new ArrayList<>();
         this.dbManager = null;
-    }
+    }*/
 
-    // REMOVED "throws SQLException"
-    public void updateStock(Part part, int quantityChange) {
-        if (dbManager != null) {
-            dbManager.updatePart(part);
-            // Stock updated in Memory
-        } else {
-            // Handle disconnected state if necessary
-            System.err.println("InventoryManager not connected to DBManager.");
-        }
-    }
 
     public List<Part> getInventory() {
+
         return inventory;
     }
 }
