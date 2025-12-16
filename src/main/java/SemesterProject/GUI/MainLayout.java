@@ -80,7 +80,6 @@ public class MainLayout extends BorderPane {
 
         Button btnInventory = createNavButton("Inventory");
         btnInventory.setOnAction(e -> {
-            categorizedInventoryView.refreshTable();
             this.setCenter(categorizedInventoryView);
         });
 

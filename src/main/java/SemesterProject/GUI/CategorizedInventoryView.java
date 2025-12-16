@@ -7,188 +7,220 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+
 import java.util.ArrayList;
 import java.util.List;
 
-public class CategorizedInventoryView extends StackPane {
+/**
+ * SAME functionality as CategorizedInventoryView
+ * BUT implemented using GridPane instead of StackPane
+ */
+public class CategorizedInventoryView extends GridPane {
 
-    private MainApp app;
-    private List<Part> masterPartList;
-
-    private VBox currentView;
+    private final MainApp app;
+    private final List<Part> masterPartList;
 
     public CategorizedInventoryView(List<Part> masterPartList, MainApp app) {
         this.masterPartList = masterPartList;
         this.app = app;
-        this.setStyle("-fx-background-color: #ecf0f1;");
-        this.setPadding(new Insets(20));
+
+        setPadding(new Insets(20));
+        setHgap(20);
+        setVgap(20);
+        setAlignment(Pos.CENTER);
+        setStyle("-fx-background-color: #ecf0f1;");
+
         showLevel1_Categories();
     }
 
-    // LEVEL 1: CATEGORIES
+    /* ==============================
+       CLEAR GRID (REPLACES StackPane clear)
+       ============================== */
+    private void clearGrid() {
+        getChildren().clear();
+    }
+
+    /* ==============================
+       LEVEL 1 : BODY / ENGINE
+       ============================== */
     public void showLevel1_Categories() {
-        this.getChildren().clear();
-        Label lblTitle = new Label("Select Category");
-        lblTitle.setFont(Font.font("Arial", FontWeight.BOLD, 30));
+        clearGrid();
 
-        HBox tilesContainer = new HBox(40);
-        tilesContainer.setAlignment(Pos.CENTER);
+        Label title = new Label("Select Category");
+        title.setFont(Font.font("Arial", FontWeight.BOLD, 30));
 
-        Button btnBody = createTile("🚗 Body Parts", "#3498db");
+        Button btnBody = createMainButton("Body Parts");
+        Button btnEngine = createMainButton("Engine Parts");
+
         btnBody.setOnAction(e -> showLevel2_SubTypes("Body"));
-
-        Button btnEngine = createTile("⚙️ Engine Parts", "#e67e22");
         btnEngine.setOnAction(e -> showLevel2_SubTypes("Engine"));
 
-        tilesContainer.getChildren().addAll(btnBody, btnEngine);
+        add(title, 0, 0, 2, 1);
+        setHalignment(title, javafx.geometry.HPos.CENTER);
 
-        currentView = new VBox(40, lblTitle, tilesContainer);
-        currentView.setAlignment(Pos.CENTER);
-        this.getChildren().add(currentView);
+        add(btnBody, 0, 1);
+        add(btnEngine, 1, 1);
     }
 
-    // LEVEL 2: SUB-CATEGORIES
+    /* ==============================
+       LEVEL 2 : SUB CATEGORIES
+       ============================== */
     public void showLevel2_SubTypes(String category) {
-        this.getChildren().clear();
-        Label lblTitle = new Label(category + " Categories");
-        lblTitle.setFont(Font.font("Arial", FontWeight.BOLD, 24));
+        clearGrid();
 
-        FlowPane tilesPane = new FlowPane();
-        tilesPane.setHgap(20); tilesPane.setVgap(20);
-        tilesPane.setAlignment(Pos.CENTER);
+        Label title = new Label(category + " Parts");
+        title.setFont(Font.font("Arial", FontWeight.BOLD, 24));
+
+        add(title, 0, 0, 2, 1);
+        setHalignment(title, javafx.geometry.HPos.CENTER);
 
         List<String> subTypes = new ArrayList<>();
+
         if (category.equals("Body")) {
-            subTypes.add("FrontLaminatedGlass"); subTypes.add("FrontGlass");
-            subTypes.add("RearGlass"); subTypes.add("DoorGlass");
-            subTypes.add("FrontBumper"); subTypes.add("RearBumper");
+            subTypes = List.of(
+                    "FrontLaminatedGlass",
+                    "FrontGlass",
+                    "RearGlass",
+                    "DoorGlass",
+                    "FrontBumper",
+                    "RearBumper"
+            );
         } else {
-            subTypes.add("Pistons"); subTypes.add("SparkPlugs");
+            subTypes = List.of("Pistons", "SparkPlugs");
         }
 
+        int row = 1;
         for (String type : subTypes) {
             String displayName = type.replaceAll("(.)([A-Z])", "$1 $2");
-            Button btnType = createTile(displayName, "#9b59b6");
-            btnType.setOnAction(e -> showLevel3_PartList(type, displayName));
-            tilesPane.getChildren().add(btnType);
+            Button btn = new Button(displayName);
+            btn.setPrefWidth(300);
+            btn.setFont(Font.font(16));
+
+            btn.setOnAction(e -> showLevel3_PartTable(type, displayName, category));
+            add(btn, 0, row++, 2, 1);
+            setHalignment(btn, javafx.geometry.HPos.CENTER);
         }
 
-        Button btnBack = new Button("⬅ Back to Home");
+        Button btnBack = new Button("⬅ Back");
         btnBack.setOnAction(e -> showLevel1_Categories());
-
-        currentView = new VBox(20, btnBack, lblTitle, tilesPane);
-        currentView.setAlignment(Pos.TOP_CENTER);
-        this.getChildren().add(currentView);
+        add(btnBack, 0, row, 2, 1);
+        setHalignment(btnBack, javafx.geometry.HPos.CENTER);
     }
 
-    // LEVEL 3: PART LIST
-    public void showLevel3_PartList(String rawTypeClass, String displayName) {
-        this.getChildren().clear();
-        Label lblTitle = new Label(displayName + " Inventory");
-        lblTitle.setFont(Font.font("Arial", FontWeight.BOLD, 24));
+    /* ==============================
+       LEVEL 3 : PARTS TABLE
+       ============================== */
+    public void showLevel3_PartTable(String rawType, String displayName, String category) {
+        clearGrid();
 
-        FlowPane tilesPane = new FlowPane();
-        tilesPane.setHgap(20); tilesPane.setVgap(20);
-        tilesPane.setAlignment(Pos.CENTER);
+        Label title = new Label(displayName + " Inventory");
+        title.setFont(Font.font("Arial", FontWeight.BOLD, 22));
 
-        List<Part> filteredParts = new ArrayList<>();
+        TableView<Part> table = new TableView<>();
+        table.setPrefHeight(350);
+
+        TableColumn<Part, String> nameCol = new TableColumn<>("Part Name");
+        nameCol.setCellValueFactory(d -> new javafx.beans.property.SimpleStringProperty(d.getValue().getName()));
+        nameCol.setPrefWidth(200);
+
+        TableColumn<Part, Number> qtyCol = new TableColumn<>("Quantity");
+        qtyCol.setCellValueFactory(d -> new javafx.beans.property.SimpleIntegerProperty(d.getValue().getCurrentStock()));
+        qtyCol.setPrefWidth(100);
+
+        TableColumn<Part, Number> priceCol = new TableColumn<>("Unit Price");
+        priceCol.setCellValueFactory(d -> new javafx.beans.property.SimpleDoubleProperty(d.getValue().getUnitPrice()));
+        priceCol.setPrefWidth(120);
+
+        TableColumn<Part, Number> totalCol = new TableColumn<>("Total Value");
+        totalCol.setCellValueFactory(d -> new javafx.beans.property.SimpleDoubleProperty(
+                d.getValue().getCurrentStock() * d.getValue().getUnitPrice()));
+        totalCol.setPrefWidth(150);
+
+        table.getColumns().addAll(nameCol, qtyCol, priceCol, totalCol);
+
+        int totalQty = 0;
+        double totalValue = 0;
+
         for (Part p : masterPartList) {
-            if (p.getClass().getSimpleName().equalsIgnoreCase(rawTypeClass)) filteredParts.add(p);
-        }
-
-        if (filteredParts.isEmpty()) {
-            tilesPane.getChildren().add(new Label("No items found."));
-        } else {
-            for (Part p : filteredParts) {
-                String labelText = p.getName() + "\n(Qty: " + p.getCurrentStock() + ")";
-                Button btnPart = createTile(labelText, "#2ecc71");
-                btnPart.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-alignment: center; -fx-wrap-text: true;");
-                btnPart.setPrefSize(180, 100);
-                btnPart.setOnAction(e -> showLevel4_PartDetail(p));
-                tilesPane.getChildren().add(btnPart);
+            if (p.getClass().getSimpleName().equalsIgnoreCase(rawType)) {
+                table.getItems().add(p);
+                totalQty += p.getCurrentStock();
+                totalValue += p.getCurrentStock() * p.getUnitPrice();
             }
         }
 
-        Button btnBack = new Button("⬅ Back to Categories");
-        btnBack.setOnAction(e -> showLevel2_SubTypes("Body"));
+        Label summary = new Label("Total Qty: " + totalQty + " | Total Value: $" + String.format("%.2f", totalValue));
+        summary.setFont(Font.font("Arial", FontWeight.BOLD, 16));
 
-        currentView = new VBox(20, btnBack, lblTitle, tilesPane);
-        currentView.setAlignment(Pos.TOP_CENTER);
-        this.getChildren().add(currentView);
-    }
-
-    // LEVEL 4: DETAIL (UPDATED Logic)
-    public void showLevel4_PartDetail(Part part) {
-        this.getChildren().clear();
-
-        Label lblName = new Label(part.getName());
-        lblName.setFont(Font.font("Arial", FontWeight.BOLD, 32));
-
-        Label lblModel = new Label("Model: " + part.getCarModel());
-        lblModel.setFont(Font.font("Arial", 18));
-
-        Label lblPrice = new Label("Price: $" + part.getUnitPrice());
-        lblPrice.setFont(Font.font("Arial", 18));
-
-        Label lblQtyTitle = new Label("Current Quantity");
-        Label lblQty = new Label(String.valueOf(part.getCurrentStock()));
-        lblQty.setFont(Font.font("Arial", FontWeight.BOLD, 80));
-        lblQty.setStyle("-fx-text-fill: #34495e;");
-
-        HBox actionBox = new HBox(30);
-        actionBox.setAlignment(Pos.CENTER);
-
-        Button btnDecrease = new Button("➖ Sale (-1)");
-        btnDecrease.setPrefSize(160, 60);
-        btnDecrease.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold;");
-
-        Button btnIncrease = new Button("➕ Stock (+1)");
-        btnIncrease.setPrefSize(160, 60);
-        btnIncrease.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold;");
-
-        // INCREASE
-        btnIncrease.setOnAction(e -> {
-            app.increaseStock(part);
-            lblQty.setText(String.valueOf(part.getCurrentStock()));
+        table.setRowFactory(tv -> {
+            TableRow<Part> row = new TableRow<>();
+            row.setOnMouseClicked(e -> {
+                if (!row.isEmpty()) {
+                    showQuickStockDialog(row.getItem(), rawType, category);
+                }
+            });
+            return row;
         });
 
-        // DECREASE (Updated: No Dialog, Automatic Logic)
-        btnDecrease.setOnAction(e -> {
+        Button btnBack = new Button("⬅ Back");
+        btnBack.setOnAction(e -> showLevel2_SubTypes(category));
+
+        add(title, 0, 0, 2, 1);
+        add(table, 0, 1, 2, 1);
+        add(summary, 0, 2, 2, 1);
+        add(btnBack, 0, 3, 2, 1);
+
+        setHalignment(title, javafx.geometry.HPos.CENTER);
+        setHalignment(summary, javafx.geometry.HPos.CENTER);
+        setHalignment(btnBack, javafx.geometry.HPos.CENTER);
+    }
+
+    /* ==============================
+       QUICK + / - DIALOG
+       ============================== */
+    private void showQuickStockDialog(Part part, String rawType, String category) {
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("Update Stock");
+        dialog.setHeaderText(part.getName());
+
+        Label qty = new Label("Current Qty: " + part.getCurrentStock());
+        qty.setFont(Font.font("Arial", FontWeight.BOLD, 16));
+
+        Button plus = new Button("➕ Add 1");
+        Button minus = new Button("➖ Remove 1");
+
+        plus.setOnAction(e -> {
+            app.increaseStock(part);
+            qty.setText("Current Qty: " + part.getCurrentStock());
+        });
+
+        minus.setOnAction(e -> {
             if (part.getCurrentStock() <= 0) {
-                new Alert(Alert.AlertType.ERROR, "Out of Stock!").showAndWait();
+                new Alert(Alert.AlertType.ERROR, "Out of stock").show();
                 return;
             }
-            // 1. Directly Record Sale
             app.recordSale(part);
-
-            // 2. Update Label
-            lblQty.setText(String.valueOf(part.getCurrentStock()));
-
-            // 3. Optional: Visual Confirmation
-            if (part.getCurrentStock() <= 5) {
-                lblQty.setStyle("-fx-text-fill: red;"); // Turn red if low stock
-            }
+            qty.setText("Current Qty: " + part.getCurrentStock());
         });
 
-        actionBox.getChildren().addAll(btnDecrease, btnIncrease);
+        HBox buttons = new HBox(15, minus, plus);
+        buttons.setAlignment(Pos.CENTER);
 
-        Button btnBack = new Button("⬅ Back to List");
-        btnBack.setOnAction(e -> showLevel3_PartList(part.getClass().getSimpleName(), part.getClass().getSimpleName()));
+        VBox content = new VBox(15, qty, buttons);
+        content.setAlignment(Pos.CENTER);
+        content.setPadding(new Insets(20));
 
-        currentView = new VBox(20, btnBack, lblName, lblModel, lblPrice, new Separator(), lblQtyTitle, lblQty, actionBox);
-        currentView.setAlignment(Pos.CENTER);
-        currentView.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 0);");
-        currentView.setMaxSize(600, 500);
+        dialog.getDialogPane().setContent(content);
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+        dialog.showAndWait();
 
-        this.getChildren().add(currentView);
+        showLevel3_PartTable(rawType, rawType, category);
     }
 
-    private Button createTile(String text, String colorHex) {
+    private Button createMainButton(String text) {
         Button btn = new Button(text);
-        btn.setPrefSize(220, 150);
-        btn.setStyle("-fx-background-color: " + colorHex + "; -fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold; -fx-background-radius: 10;");
+        btn.setPrefSize(260, 70);
+        btn.setFont(Font.font("Arial", FontWeight.BOLD, 18));
         return btn;
     }
-
-    public void refreshTable() { showLevel1_Categories(); }
 }
