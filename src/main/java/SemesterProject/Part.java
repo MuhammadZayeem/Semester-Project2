@@ -1,5 +1,4 @@
 package SemesterProject;
-
 import SemesterProject.Exception.LowStockException;
 import SemesterProject.Exception.NegativeStockException;
 
@@ -27,11 +26,11 @@ public abstract class Part {
 
     // --------------------------------------------------------Quantity Methods
     public void addQuantity(int amount) {
-        // FIXED: Now allows negative numbers (e.g., -1) as long as stock stays >= 0
-        if (this.quantity + amount >= 0) {
-            this.quantity += amount;
-        }
+        if (this.quantity+amount>= 0)
+             this.quantity += amount;
     }
+
+
 
     //----------------------------------------------------------------------------Getters & Setters
     public String getName() { return name; }
@@ -41,8 +40,8 @@ public abstract class Part {
     public int getMinThreshold() { return threshold; }
     public double getUnitPrice() { return unitPrice; }
     public String getPartId() { return partId; }
-
     public void setPartId(String partId) { this.partId = partId; }
     public void setCurrentStock(int quantity) { this.quantity = quantity; }
+    //public void setThreshold(int threshold) { this.threshold = threshold; }
     public void setUnitPrice(double unitPrice) { this.unitPrice = unitPrice; }
 }

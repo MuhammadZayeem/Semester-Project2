@@ -42,11 +42,19 @@ public class CategorizedInventoryView extends GridPane {
         Button btnBody = createMainButton("Body Parts");
         btnBody.setOnAction(e -> showLevel2_SubTypes("Body"));
 
+        // --- ADDED BACK BUTTON HERE ---
+        Button btnBack = new Button("⬅ Back to Dashboard");
+        btnBack.setOnAction(e -> app.showMainDashboard());
+
         add(title, 0, 0);
         setHalignment(title, javafx.geometry.HPos.CENTER);
 
         add(btnBody, 0, 1);
         setHalignment(btnBody, javafx.geometry.HPos.CENTER);
+
+        // Add Back Button at Row 2
+        add(btnBack, 0, 2);
+        setHalignment(btnBack, javafx.geometry.HPos.CENTER);
     }
 
     // LEVEL 2: SUB-CATEGORIES
@@ -105,7 +113,7 @@ public class CategorizedInventoryView extends GridPane {
         totalCol.setCellValueFactory(d -> new javafx.beans.property.SimpleDoubleProperty(d.getValue().getCurrentStock()*d.getValue().getUnitPrice()));
         totalCol.setPrefWidth(150);
 
-        table.getColumns().addAll(nameCol, qtyCol, priceCol, totalCol); // DELETE COLUMN REMOVED
+        table.getColumns().addAll(nameCol, qtyCol, priceCol, totalCol);
 
         int totalQty = 0;
         double totalValue = 0;

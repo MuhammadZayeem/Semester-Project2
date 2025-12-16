@@ -3,19 +3,18 @@ package SemesterProject;
 import SemesterProject.Login.Admin;
 import SemesterProject.Login.Staff;
 import SemesterProject.Sales.Sale;
-import SemesterProject.Body.*;
 import SemesterProject.Exception.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DatabaseManager {
+public class Data {
 
     // IN-MEMORY STORAGE
     private List<User> users;
     private List<Part> parts;
     private List<Sale> sales;
 
-    public DatabaseManager() throws UserCreationException {
+    public Data() throws UserCreationException {
         this.users = new ArrayList<>();
         this.parts = new ArrayList<>();
         this.sales = new ArrayList<>();

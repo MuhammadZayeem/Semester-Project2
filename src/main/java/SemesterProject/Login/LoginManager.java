@@ -2,14 +2,14 @@ package SemesterProject.Login;
 import SemesterProject.User;
 import java.util.ArrayList;
 import java.util.List;
-import SemesterProject.DatabaseManager;
+import SemesterProject.Data;
 
 public class LoginManager {
 
-    private DatabaseManager dbManager;
+    private Data dbManager;
     private ArrayList<PasswordResetRequest> resetRequests = new ArrayList<>();
 
-    public LoginManager(DatabaseManager dbManager) {
+    public LoginManager(Data dbManager) {
         this.dbManager = dbManager;
     }
 
