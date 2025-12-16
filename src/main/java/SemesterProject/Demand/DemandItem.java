@@ -14,5 +14,4 @@ public class DemandItem {
 
     public Part getPart() {return part;}
     public int getQuantityNeeded() {return quantityNeeded;}
-    public double getTotalCost() {return part.getUnitPrice() * quantityNeeded;}
 }

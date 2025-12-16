@@ -18,12 +18,6 @@ public class Admin extends User {
         return data.removeUser(username);
     }
 
-    /*public void updateUserDetails(MainApp app, String targetUsername, String newUsername, String newFullName) throws UserNotFoundException, UserAlreadyExistsException {
-        if (!app.updateUserDetails(targetUsername, newUsername, newFullName)) {
-            throw new UserNotFoundException("User not found: " + targetUsername);
-        }
-    }*/
-
     public void resetUserPassword(MainApp app, String username, String newPassword) {
         User userToReset = app.findUser(username);
         if (userToReset != null) {

@@ -1,3 +1,4 @@
+/*
 package SemesterProject.InventoryManagment;
 
 import SemesterProject.Part;
@@ -8,21 +9,14 @@ import java.util.List;
 public class InventoryManager {
 
     private List<Part> inventory;
-    private Data dbManager;
+    private Data data;
 
-    public InventoryManager(Data dbManager) {
+    public InventoryManager(Data data) {
         this.inventory = new ArrayList<>();
-        this.dbManager = dbManager;
+        this.data = data;
     }
-
-    // Default constructor
-   /* public InventoryManager() {
-        this.inventory = new ArrayList<>();
-        this.dbManager = null;
-    }*/
-
 
     public List<Part> getInventory() {
         return inventory;
     }
-}
+}*/

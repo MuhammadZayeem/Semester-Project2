@@ -6,23 +6,23 @@ import SemesterProject.Data;
 
 public class LoginManager {
 
-    private Data dbManager;
+    private Data data;
     private ArrayList<PasswordResetRequest> resetRequests = new ArrayList<>();
 
-    public LoginManager(Data dbManager) {
-        this.dbManager = dbManager;
+    public LoginManager(Data data) {
+        this.data = data;
     }
 
     // --------------------------------------------------------------------LOGIN
     public User login(String username, String password) {
-        User u = dbManager.findUserByUsername(username);
+        User u = data.findUserByUsername(username);
 
         if (u == null) {
             //"User not found!"
             return null;
         }
         if (u.PasswordValidation(password)) {
-            dbManager.updateLastLogin(username);
+            data.updateLastLogin(username);
             //login success
             return u;
         } else {
@@ -30,9 +30,10 @@ public class LoginManager {
             return null;
         }
     }
+
     // --------------------------------------------------------FIND USER
     public User findUser(String username) {
-        return dbManager.findUserByUsername(username);
+        return data.findUserByUsername(username);
     }
 
     // -------------------------------------- STAFF REQUEST PASSWORD RESET
@@ -45,12 +46,11 @@ public class LoginManager {
 
         for (PasswordResetRequest req : resetRequests) {
             if (req.getUsername().equalsIgnoreCase(username)) {
-                 //only staff can request
+                //only staff can request
                 return;
             }
         }
         resetRequests.add(new PasswordResetRequest(username));
-        //password reset req sent
     }
 
     // ----------------------------------------------------------------------- ADMIN APPROVE RESET
@@ -66,11 +66,8 @@ public class LoginManager {
                 break;
             }
         }
-
-        //-------------------------------------------------------------------DBManager to update password
-        if (dbManager.updatePassword(staffUsername, newPassword)) {
+   if (data.updatePassword(staffUsername, newPassword)) {
             resetRequests.remove(request);
-            //password updated
             return true;
         } else {
             //failed to update
@@ -78,15 +75,13 @@ public class LoginManager {
         }
     }
 
-    // ----------------------------------------------------------------GET PENDING RESET REQUESTS
-    public List<PasswordResetRequest> getPendingRequests() {
-        return new ArrayList<>(resetRequests);
-    }
+        // ----------------------------------------------------------------GET PENDING RESET REQUESTS
+        public List<PasswordResetRequest> getPendingRequests () {
+            return new ArrayList<>(resetRequests);
+        }
 
-    // ------------------------------------------------------GET ALL USERS
-    public List<User> getActiveUsers() {
-        return dbManager.getAllUsers();
+        // ------------------------------------------------------GET ALL USERS
+        public List<User> getActiveUsers () {
+            return data.getAllUsers();
+        }
     }
-
-    //public void showPendingRequests() {}
-}
