@@ -1,7 +1,6 @@
 package SemesterProject;
 import SemesterProject.Exception.LowStockException;
 import SemesterProject.Exception.NegativeStockException;
-import SemesterProject.Supplier.Supplier;
 
 public abstract class Part {
 
@@ -12,11 +11,10 @@ public abstract class Part {
     protected int quantity;
     protected int threshold;
     protected double unitPrice;
-    protected Supplier supplier;
 
     //----------------------------------------------------------------Constructor
     public Part(String partId, String name, String category, String carChasis,
-                int quantity, int threshold, double unitPrice, Supplier supplier) {
+                int quantity, int threshold, double unitPrice) {
         this.partId = partId;
         this.name = name;
         this.category = category;
@@ -24,7 +22,6 @@ public abstract class Part {
         this.quantity = quantity;
         this.threshold = threshold;
         this.unitPrice = unitPrice;
-        this.supplier = supplier;
     }
 
     // --------------------------------------------------------Quantity Methods
@@ -42,11 +39,9 @@ public abstract class Part {
     public int getCurrentStock() { return quantity; }
     public int getMinThreshold() { return threshold; }
     public double getUnitPrice() { return unitPrice; }
-    public Supplier getSupplier() { return supplier; }
     public String getPartId() { return partId; }
     public void setPartId(String partId) { this.partId = partId; }
     public void setCurrentStock(int quantity) { this.quantity = quantity; }
-    public void setThreshold(int threshold) { this.threshold = threshold; }
+    //public void setThreshold(int threshold) { this.threshold = threshold; }
     public void setUnitPrice(double unitPrice) { this.unitPrice = unitPrice; }
-    public void setSupplier(Supplier supplier) { this.supplier = supplier; }
 }
