@@ -2,13 +2,11 @@ package SemesterProject;
 
 import SemesterProject.Login.Admin;
 import SemesterProject.Login.Staff;
-import SemesterProject.Login.UserRoles;
 import SemesterProject.Sales.Sale;
 import SemesterProject.Body.*;
 import SemesterProject.Supplier.Supplier;
 import SemesterProject.Supplier.LocalSupplier;
-import SemesterProject.Exception.UserAlreadyExistsException;
-import SemesterProject.Exception.UserNotFoundException;
+import SemesterProject.Exception.*; // Import your exceptions
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,21 +19,20 @@ public class DatabaseManager {
     private List<Part> parts;
     private List<Sale> sales;
 
-    public DatabaseManager() {
+    public DatabaseManager() throws UserCreationException {
         this.users = new ArrayList<>();
         this.parts = new ArrayList<>();
         this.sales = new ArrayList<>();
-
-        System.out.println("Simple In-Memory Database Initialized.");
         initializeDefaultUsers();
+
     }
 
-    private void initializeDefaultUsers() {
+    private void initializeDefaultUsers() throws UserCreationException {
         try {
             addUser(new Admin("U01", "admin", "123"));
-            addUser(new Staff("U02", "staff", "123", "John Doe", "1111"));
+            addUser(new Staff("U02", "staff", "123"));
         } catch (Exception e) {
-            System.err.println("Error creating default users: " + e.getMessage());
+            throw new UserCreationException("System error: " + e.getMessage());
         }
     }
 
@@ -54,29 +51,31 @@ public class DatabaseManager {
         return new ArrayList<>(users);
     }
 
-    public void addUser(User newUser) throws Exception {
+    // UPDATED: Throws UserAlreadyExistsException
+    public void addUser(User newUser) throws UserAlreadyExistsException {
         if (findUserByUsername(newUser.getUsername()) != null) {
-            throw new UserAlreadyExistsException("Username already exists: " + newUser.getUsername());
+            throw new UserAlreadyExistsException("User already exists in system: " + newUser.getUsername());
         }
-        // Simple ID generation
+
         if (newUser.getUserId() == null) {
-            // In a real app we'd use a setter, but for this simpler version
-            // we accept the object as is or we could regenerate it if we had a setUserId method.
-            // Since we are keeping it simple, we just add it.
+            // Simple ID generation for memory mode
+            // Note: In a real app, use setter. Here we assume object construction logic.
         }
         users.add(newUser);
         System.out.println("User added: " + newUser.getUsername());
     }
 
+    // UPDATED: Throws UserNotFoundException
     public boolean removeUser(String username) throws UserNotFoundException {
         User u = findUserByUsername(username);
         if (u != null) {
             users.remove(u);
             return true;
         }
-        throw new UserNotFoundException("User not found: " + username);
+        throw new UserNotFoundException("Cannot remove. User not found: " + username);
     }
 
+    // UPDATED: Throws UserAlreadyExistsException
     public boolean updateUserDetails(String oldUsername, String newUsername, String newFullName) throws UserAlreadyExistsException {
         User u = findUserByUsername(oldUsername);
         if (u == null) return false;
@@ -84,18 +83,17 @@ public class DatabaseManager {
         // Check if new username is taken
         User check = findUserByUsername(newUsername);
         if (check != null && !check.getUsername().equalsIgnoreCase(oldUsername)) {
-            throw new UserAlreadyExistsException("Username taken.");
+            throw new UserAlreadyExistsException("New username '" + newUsername + "' is already taken.");
         }
 
         u.setUsername(newUsername);
-        // Note: Full Name update skipped for simplicity as User class doesn't have setFullName
         return true;
     }
 
     public boolean updatePassword(String username, String newPassword) {
         User u = findUserByUsername(username);
         if (u != null) {
-            u.setPassword(newPassword); // Uses the new setter we added to User.java
+            u.setPassword(newPassword);
             return true;
         }
         return false;
@@ -107,7 +105,15 @@ public class DatabaseManager {
 
     public List<Part> getAllParts() { return new ArrayList<>(parts); }
 
-    public void addPart(Part part) {
+    // UPDATED: Throws DuplicatePartException
+    public void addPart(Part part) throws DuplicatePartException {
+        // Check for duplicate part name
+        for (Part p : parts) {
+            if (p.getName().equalsIgnoreCase(part.getName())) {
+                throw new DuplicatePartException("Part '" + part.getName() + "' already exists in inventory!");
+            }
+        }
+
         if (part.getPartId() == null) {
             part.setPartId("P" + (parts.size() + 1));
         }
@@ -115,8 +121,7 @@ public class DatabaseManager {
     }
 
     public void updatePart(Part part) {
-        // Since it's in-memory, the object is likely already updated by reference.
-        // We can just print a confirmation.
+        // In-memory update is implicit via reference
         System.out.println("Part updated: " + part.getName());
     }
 
