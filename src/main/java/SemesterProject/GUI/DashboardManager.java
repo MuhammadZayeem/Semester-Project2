@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-
 public class DashboardManager {
 
     private List<Part> PartList;
@@ -22,13 +21,11 @@ public class DashboardManager {
     private DemandManager demandManager;
     private VBox dashboardView;
 
-    //------------------------------------------------Show these on dashboard
-    private int totalStockQuantity;  //Total Parts
-    private int lowStockItems;       //low stock items
-    private int partsUsedToday;      // Parts Sold Today
-    private int pendingDemandsCount; // pending demand
+    private int totalStockQuantity;
+    private int lowStockItems;
+    private int partsUsedToday;
+    private int pendingDemandsCount;
 
-    // Label references
     private Label LabelTotalStockQuantity;
     private Label LabelLowStock;
     private Label LabelPartsUsedToday;
@@ -38,35 +35,47 @@ public class DashboardManager {
         this.PartList = PartList;
         this.SaleList = SaleList;
         this.demandManager = demandManager;
-       this.dashboardView = createDashboardLayout();
+        this.dashboardView = createDashboardLayout();
     }
 
-    public void updateDashboardData() {     //to claculate values
-        totalStockQuantity = PartList.stream().mapToInt(Part::getCurrentStock).sum();
-        lowStockItems = (int) PartList.stream().filter(p -> p.getCurrentStock() <= p.getMinThreshold()).count();
+    public void updateDashboardData() {
+        // 1. Calculate Total Stock using a simple Loop (No Streams)
+        totalStockQuantity = 0;
+        for (Part p : PartList) {
+            totalStockQuantity += p.getCurrentStock();
+        }
+
+        // 2. Calculate Low Stock Items using a simple Loop
+        lowStockItems = 0;
+        for (Part p : PartList) {
+            if (p.getCurrentStock() <= p.getMinThreshold()) {
+                lowStockItems++;
+            }
+        }
+
         calculateUsageMetrics();
         this.pendingDemandsCount = demandManager.getDemandList().size();
         updateUI();
     }
 
-    private void calculateUsageMetrics() { //parts sold today
-        LocalDateTime Today = LocalDateTime.now().truncatedTo(ChronoUnit.DAYS);
+    private void calculateUsageMetrics() {
+        LocalDateTime today = LocalDateTime.now().truncatedTo(ChronoUnit.DAYS);
         partsUsedToday = 0;
+
         for (Sale sale : SaleList) {
-            if (sale.getSaleDateTime() != null && sale.getSaleDateTime().isAfter(Today)) {
+            if (sale.getSaleDateTime() != null && sale.getSaleDateTime().isAfter(today)) {
                 partsUsedToday += sale.getQuantitySold();
             }
         }
     }
 
-
-    //-----------------------------------------------------------------GUI Methods
+    // --- GUI CREATION (Standard) ---
     private VBox createDashboardLayout() {
         VBox container = new VBox(20);
         container.setPadding(new Insets(20));
         container.setStyle("-fx-background-color: lightgray;");
 
-        Label labelTitle = new Label("System Dashboard"); // Title
+        Label labelTitle = new Label("System Dashboard");
         labelTitle.setFont(Font.font("Arial", FontWeight.BOLD, 28));
 
         GridPane tileGrid = new GridPane();
@@ -78,7 +87,6 @@ public class DashboardManager {
         LabelPartsUsedToday = createDataLabel(String.valueOf(partsUsedToday));
         LabelPendingDemands = createDataLabel(String.valueOf(pendingDemandsCount));
 
-        //-----------------------------------------------------Tiles layout
         tileGrid.add(createTile("Total Parts", LabelTotalStockQuantity, "blue"), 0, 0);
         tileGrid.add(createTile("Low Stock", LabelLowStock, "red"), 1, 0);
         tileGrid.add(createTile("Sold Parts", LabelPartsUsedToday, "green"), 0, 1);
@@ -100,12 +108,13 @@ public class DashboardManager {
         tile.setAlignment(Pos.CENTER);
         tile.setPadding(new Insets(15));
         tile.setPrefSize(200, 100);
-        tile.setStyle("-fx-background-color: "+color);
+        tile.setStyle("-fx-background-color: " + color);
 
         Label labelTitle = new Label(title);
         labelTitle.setFont(Font.font("Arial", 15));
         labelTitle.setStyle("-fx-text-fill: white;");
         dataLabel.setStyle("-fx-text-fill: white; -fx-font-weight: bold;");
+
         tile.getChildren().addAll(labelTitle, dataLabel);
         return tile;
     }
@@ -120,5 +129,6 @@ public class DashboardManager {
         updateDashboardData();
         return dashboardView;
     }
-    public List<Sale> getSalesList() {return SaleList;}
+
+    public List<Sale> getSalesList() { return SaleList; }
 }

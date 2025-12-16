@@ -4,7 +4,7 @@ import SemesterProject.Part;
 import SemesterProject.DatabaseManager;
 import java.util.ArrayList;
 import java.util.List;
-import java.sql.SQLException;
+// SQL Import removed
 
 public class InventoryManager {
 
@@ -16,20 +16,23 @@ public class InventoryManager {
         this.dbManager = dbManager;
     }
 
-    //------------------------------------------------Default constructor
+    // Default constructor
     public InventoryManager() {
         this.inventory = new ArrayList<>();
         this.dbManager = null;
     }
 
-    public void updateStock(Part part, int quantityChange) throws SQLException {
+    // REMOVED "throws SQLException"
+    public void updateStock(Part part, int quantityChange) {
         if (dbManager != null) {
             dbManager.updatePart(part);
-            //Stock updated in DB for:part.getName()
+            // Stock updated in Memory
         } else {
-            //throw new IllegalStateException("InventoryManager not connected to DatabaseManager.");
+            // Handle disconnected state if necessary
+            System.err.println("InventoryManager not connected to DBManager.");
         }
     }
+
     public List<Part> getInventory() {
         return inventory;
     }
