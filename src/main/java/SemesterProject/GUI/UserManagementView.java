@@ -139,7 +139,7 @@ public class UserManagementView extends VBox {
                 if (role == UserRoles.ADMIN) {
                     newUser = new Admin(null, username, password);
                 } else {
-                    newUser = new Staff(null, username, password, defaultName, defaultContact);
+                    newUser = new Staff(null, username, password);
                 }
                 adminUser.addUser(app, newUser);
                 lblStatus.setText("User '" + username + "' added successfully as " + role + ".");

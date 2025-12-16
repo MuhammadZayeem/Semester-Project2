@@ -1,6 +1,7 @@
 package SemesterProject.GUI;
 
 import SemesterProject.Body.*;
+import SemesterProject.Exception.UserCreationException;
 import SemesterProject.InventoryManagment.InventoryManager;
 import SemesterProject.Login.Admin;
 import SemesterProject.Login.LoginManager;
@@ -40,13 +41,13 @@ public class MainApp extends Application {
     private final LocalSupplier mockSupplier = new LocalSupplier("MockSupplier", "N/A", "N/A", "N/A", "N/A");
 
     @Override
-    public void start(Stage primaryStage) {
+    public void start(Stage primaryStage) throws UserCreationException {
         this.primaryStage = primaryStage;
         initializeData();
         showLoginScreen();
     }
 
-    private void initializeData() {
+    private void initializeData() throws UserCreationException {
         // 1. Initialize In-Memory DB (and other managers)
         dbManager = new DatabaseManager();
         loginManager = new LoginManager(dbManager);

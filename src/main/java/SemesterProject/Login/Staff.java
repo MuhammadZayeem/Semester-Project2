@@ -3,7 +3,7 @@ import SemesterProject.User;
 
 public class Staff extends User {
 
-    public Staff(String userId, String username, String password, String fullName, String contactNumber) {
+    public Staff(String userId, String username, String password) {
         super(userId, username, password, UserRoles.STAFF);
     }
     @Override
