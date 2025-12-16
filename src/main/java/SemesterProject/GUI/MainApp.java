@@ -171,7 +171,6 @@ public class MainApp extends Application {
             masterSaleList.add(newSale);
 
             part.setCurrentStock(newStock);
-            inventoryManager.updateStock(part, -1);
             demandManager.generateAutoDemands(masterPartList);
             dashboardManager.updateDashboardData();
 
