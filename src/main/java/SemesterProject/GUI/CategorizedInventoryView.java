@@ -1,6 +1,7 @@
 package SemesterProject.GUI;
 
 import SemesterProject.Part;
+import SemesterProject.Body.*;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
@@ -8,13 +9,9 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
-import java.util.ArrayList;
+import java.lang.reflect.Constructor;
 import java.util.List;
 
-/**
- * SAME functionality as CategorizedInventoryView
- * BUT implemented using GridPane instead of StackPane
- */
 public class CategorizedInventoryView extends GridPane {
 
     private final MainApp app;
@@ -33,16 +30,9 @@ public class CategorizedInventoryView extends GridPane {
         showLevel1_Categories();
     }
 
-    /* ==============================
-       CLEAR GRID (REPLACES StackPane clear)
-       ============================== */
-    private void clearGrid() {
-        getChildren().clear();
-    }
+    private void clearGrid() { getChildren().clear(); }
 
-    /* ==============================
-       LEVEL 1 : BODY / ENGINE
-       ============================== */
+    // LEVEL 1: CATEGORY
     public void showLevel1_Categories() {
         clearGrid();
 
@@ -50,44 +40,27 @@ public class CategorizedInventoryView extends GridPane {
         title.setFont(Font.font("Arial", FontWeight.BOLD, 30));
 
         Button btnBody = createMainButton("Body Parts");
-        Button btnEngine = createMainButton("Engine Parts");
-
         btnBody.setOnAction(e -> showLevel2_SubTypes("Body"));
-        btnEngine.setOnAction(e -> showLevel2_SubTypes("Engine"));
 
-        add(title, 0, 0, 2, 1);
+        add(title, 0, 0);
         setHalignment(title, javafx.geometry.HPos.CENTER);
 
         add(btnBody, 0, 1);
-        add(btnEngine, 1, 1);
+        setHalignment(btnBody, javafx.geometry.HPos.CENTER);
     }
 
-    /* ==============================
-       LEVEL 2 : SUB CATEGORIES
-       ============================== */
+    // LEVEL 2: SUB-CATEGORIES
     public void showLevel2_SubTypes(String category) {
         clearGrid();
 
         Label title = new Label(category + " Parts");
         title.setFont(Font.font("Arial", FontWeight.BOLD, 24));
-
-        add(title, 0, 0, 2, 1);
+        add(title, 0, 0);
         setHalignment(title, javafx.geometry.HPos.CENTER);
 
-        List<String> subTypes = new ArrayList<>();
-
-        if (category.equals("Body")) {
-            subTypes = List.of(
-                    "FrontLaminatedGlass",
-                    "FrontGlass",
-                    "RearGlass",
-                    "DoorGlass",
-                    "FrontBumper",
-                    "RearBumper"
-            );
-        } else {
-            subTypes = List.of("Pistons", "SparkPlugs");
-        }
+        List<String> subTypes = List.of(
+                "FrontLaminatedGlass","FrontGlass","RearGlass","DoorGlass","FrontBumper","RearBumper"
+        );
 
         int row = 1;
         for (String type : subTypes) {
@@ -95,21 +68,18 @@ public class CategorizedInventoryView extends GridPane {
             Button btn = new Button(displayName);
             btn.setPrefWidth(300);
             btn.setFont(Font.font(16));
-
             btn.setOnAction(e -> showLevel3_PartTable(type, displayName, category));
-            add(btn, 0, row++, 2, 1);
+            add(btn, 0, row++);
             setHalignment(btn, javafx.geometry.HPos.CENTER);
         }
 
         Button btnBack = new Button("⬅ Back");
         btnBack.setOnAction(e -> showLevel1_Categories());
-        add(btnBack, 0, row, 2, 1);
+        add(btnBack, 0, row);
         setHalignment(btnBack, javafx.geometry.HPos.CENTER);
     }
 
-    /* ==============================
-       LEVEL 3 : PARTS TABLE
-       ============================== */
+    // LEVEL 3: PART TABLE
     public void showLevel3_PartTable(String rawType, String displayName, String category) {
         clearGrid();
 
@@ -132,15 +102,13 @@ public class CategorizedInventoryView extends GridPane {
         priceCol.setPrefWidth(120);
 
         TableColumn<Part, Number> totalCol = new TableColumn<>("Total Value");
-        totalCol.setCellValueFactory(d -> new javafx.beans.property.SimpleDoubleProperty(
-                d.getValue().getCurrentStock() * d.getValue().getUnitPrice()));
+        totalCol.setCellValueFactory(d -> new javafx.beans.property.SimpleDoubleProperty(d.getValue().getCurrentStock()*d.getValue().getUnitPrice()));
         totalCol.setPrefWidth(150);
 
-        table.getColumns().addAll(nameCol, qtyCol, priceCol, totalCol);
+        table.getColumns().addAll(nameCol, qtyCol, priceCol, totalCol); // DELETE COLUMN REMOVED
 
         int totalQty = 0;
         double totalValue = 0;
-
         for (Part p : masterPartList) {
             if (p.getClass().getSimpleName().equalsIgnoreCase(rawType)) {
                 table.getItems().add(p);
@@ -154,30 +122,89 @@ public class CategorizedInventoryView extends GridPane {
 
         table.setRowFactory(tv -> {
             TableRow<Part> row = new TableRow<>();
-            row.setOnMouseClicked(e -> {
-                if (!row.isEmpty()) {
-                    showQuickStockDialog(row.getItem(), rawType, category);
-                }
-            });
+            row.setOnMouseClicked(e -> { if (!row.isEmpty()) showQuickStockDialog(row.getItem(), rawType, category); });
             return row;
         });
 
         Button btnBack = new Button("⬅ Back");
         btnBack.setOnAction(e -> showLevel2_SubTypes(category));
 
-        add(title, 0, 0, 2, 1);
-        add(table, 0, 1, 2, 1);
-        add(summary, 0, 2, 2, 1);
-        add(btnBack, 0, 3, 2, 1);
+        Button btnAdd = new Button("➕ Add New Part");
+        btnAdd.setOnAction(e -> showAddPartDialog(category));
+
+        add(title, 0, 0);
+        add(table, 0, 1);
+        add(summary, 0, 2);
+        add(btnBack, 0, 3);
+        add(btnAdd, 0, 4);
 
         setHalignment(title, javafx.geometry.HPos.CENTER);
         setHalignment(summary, javafx.geometry.HPos.CENTER);
         setHalignment(btnBack, javafx.geometry.HPos.CENTER);
+        setHalignment(btnAdd, javafx.geometry.HPos.CENTER);
     }
 
-    /* ==============================
-       QUICK + / - DIALOG
-       ============================== */
+    // ADD NEW PART (using reflection)
+    private void showAddPartDialog(String category) {
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("Add New Part");
+
+        ComboBox<String> cbType = new ComboBox<>();
+        cbType.getItems().addAll(
+                "FrontLaminatedGlass","FrontGlass","RearGlass","DoorGlass","FrontBumper","RearBumper"
+        );
+        cbType.getSelectionModel().selectFirst();
+
+        TextField tfName = new TextField();
+        TextField tfModel = new TextField();
+        TextField tfPrice = new TextField();
+        TextField tfQty = new TextField();
+
+        GridPane form = new GridPane();
+        form.setHgap(10); form.setVgap(10); form.setPadding(new Insets(20));
+        form.add(new Label("Type:"),0,0); form.add(cbType,1,0);
+        form.add(new Label("Part Name:"),0,1); form.add(tfName,1,1);
+        form.add(new Label("Car Model:"),0,2); form.add(tfModel,1,2);
+        form.add(new Label("Unit Price:"),0,3); form.add(tfPrice,1,3);
+        form.add(new Label("Quantity:"),0,4); form.add(tfQty,1,4);
+
+        dialog.getDialogPane().setContent(form);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        dialog.setResultConverter(btn -> {
+            if(btn == ButtonType.OK){
+                try{
+                    String type = cbType.getValue();
+                    String name = tfName.getText();
+                    String model = tfModel.getText();
+                    double price = Double.parseDouble(tfPrice.getText());
+                    int qty = Integer.parseInt(tfQty.getText());
+                    int threshold = 5; // default
+
+                    // Reflection to create object dynamically
+                    String className = "SemesterProject.Body." + type;
+                    Class<?> clazz = Class.forName(className);
+                    Constructor<?> constructor = clazz.getConstructor(
+                            String.class, String.class, String.class, int.class, int.class, double.class
+                    );
+                    Part newPart = (Part) constructor.newInstance(type + "-" + name, name, model, qty, threshold, price);
+
+                    masterPartList.add(newPart);
+
+                    // Refresh table for this exact type
+                    showLevel3_PartTable(type, type.replaceAll("(.)([A-Z])", "$1 $2"), "Body");
+
+                } catch (Exception ex){
+                    new Alert(Alert.AlertType.ERROR, "Invalid input!").showAndWait();
+                }
+            }
+            return null;
+        });
+
+        dialog.showAndWait();
+    }
+
+    // QUICK STOCK ADJUST DIALOG
     private void showQuickStockDialog(Part part, String rawType, String category) {
         Dialog<Void> dialog = new Dialog<>();
         dialog.setTitle("Update Stock");
@@ -188,33 +215,17 @@ public class CategorizedInventoryView extends GridPane {
 
         Button plus = new Button("➕ Add 1");
         Button minus = new Button("➖ Remove 1");
+        plus.setOnAction(e -> { part.addQuantity(1); qty.setText("Current Qty: " + part.getCurrentStock()); });
+        minus.setOnAction(e -> { if(part.getCurrentStock() > 0){ part.addQuantity(-1); qty.setText("Current Qty: " + part.getCurrentStock()); } });
 
-        plus.setOnAction(e -> {
-            app.increaseStock(part);
-            qty.setText("Current Qty: " + part.getCurrentStock());
-        });
-
-        minus.setOnAction(e -> {
-            if (part.getCurrentStock() <= 0) {
-                new Alert(Alert.AlertType.ERROR, "Out of stock").show();
-                return;
-            }
-            app.recordSale(part);
-            qty.setText("Current Qty: " + part.getCurrentStock());
-        });
-
-        HBox buttons = new HBox(15, minus, plus);
-        buttons.setAlignment(Pos.CENTER);
-
-        VBox content = new VBox(15, qty, buttons);
-        content.setAlignment(Pos.CENTER);
-        content.setPadding(new Insets(20));
+        HBox buttons = new HBox(15, minus, plus); buttons.setAlignment(Pos.CENTER);
+        VBox content = new VBox(15, qty, buttons); content.setAlignment(Pos.CENTER); content.setPadding(new Insets(20));
 
         dialog.getDialogPane().setContent(content);
         dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
         dialog.showAndWait();
 
-        showLevel3_PartTable(rawType, rawType, category);
+        showLevel3_PartTable(rawType, rawType.replaceAll("(.)([A-Z])", "$1 $2"), category);
     }
 
     private Button createMainButton(String text) {
