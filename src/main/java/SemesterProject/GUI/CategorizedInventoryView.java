@@ -223,8 +223,19 @@ public class CategorizedInventoryView extends GridPane {
 
         Button plus = new Button("➕ Add 1");
         Button minus = new Button("➖ Remove 1");
-        plus.setOnAction(e -> { part.addQuantity(1); qty.setText("Current Qty: " + part.getCurrentStock()); });
-        minus.setOnAction(e -> { if(part.getCurrentStock() > 0){ part.addQuantity(-1); qty.setText("Current Qty: " + part.getCurrentStock()); } });
+        plus.setOnAction(e -> {
+            part.addQuantity(1);
+            qty.setText("Current Qty: " + part.getCurrentStock());
+
+
+            });
+        minus.setOnAction(e -> {
+            if(part.getCurrentStock() > 0){
+                part.addQuantity(-1);
+                qty.setText("Current Qty: " + part.getCurrentStock());
+                app.recordSale(part);
+
+                } });
 
         HBox buttons = new HBox(15, minus, plus); buttons.setAlignment(Pos.CENTER);
         VBox content = new VBox(15, qty, buttons); content.setAlignment(Pos.CENTER); content.setPadding(new Insets(20));

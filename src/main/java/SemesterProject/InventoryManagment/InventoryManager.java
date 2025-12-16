@@ -15,13 +15,12 @@ public class InventoryManager {
         this.dbManager = dbManager;
     }
 
-/*    public void updateStock(Part part, int quantityChange) {
-        if (dbManager != null) {
-            dbManager.updatePart(part);
-        } else {
-            System.err.println("InventoryManager not connected to DBManager.");
-        }
+    // Default constructor
+   /* public InventoryManager() {
+        this.inventory = new ArrayList<>();
+        this.dbManager = null;
     }*/
+
 
     public List<Part> getInventory() {
         return inventory;

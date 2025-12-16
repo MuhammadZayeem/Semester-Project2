@@ -150,7 +150,7 @@ public class MainApp extends Application {
         dashboardManager.updateDashboardData();
     }
 
-/*    public void increaseStock(Part part) {
+    public void increaseStock(Part part) {
         try {
             int newStock = part.getCurrentStock() + 1;
             part.setCurrentStock(newStock);
@@ -158,7 +158,7 @@ public class MainApp extends Application {
             demandManager.generateAutoDemands(masterPartList);
             dashboardManager.updateDashboardData();
         } catch (Exception e) {}
-    }*/
+    }
 
     public void recordSale(Part part) {
         try {
@@ -171,6 +171,7 @@ public class MainApp extends Application {
             masterSaleList.add(newSale);
 
             part.setCurrentStock(newStock);
+            inventoryManager.updateStock(part, -1);
             demandManager.generateAutoDemands(masterPartList);
             dashboardManager.updateDashboardData();
 
@@ -198,8 +199,9 @@ public class MainApp extends Application {
     }
     public boolean removeUser(String username) throws UserNotFoundException { return dbManager.removeUser(username); }
     public boolean updateUserDetails(String old, String newU, String newN) throws UserAlreadyExistsException {
-        return dbManager.updateUserDetails(old, newU);
+        return dbManager.updateUserDetails(old, newU, newN);
     }
 
     public static void main(String[] args) { launch(args); }
+    public void addUser(User newUser) {}
 }
