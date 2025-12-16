@@ -26,8 +26,8 @@ public abstract class Part {
 
     // --------------------------------------------------------Quantity Methods
     public void addQuantity(int amount) {
-        if (amount <= 0) return;
-        this.quantity += amount;
+        if (this.quantity+amount>= 0)
+             this.quantity += amount;
     }
 
 

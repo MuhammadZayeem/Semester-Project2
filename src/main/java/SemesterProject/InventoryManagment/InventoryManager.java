@@ -1,16 +1,16 @@
 package SemesterProject.InventoryManagment;
 
 import SemesterProject.Part;
-import SemesterProject.DatabaseManager;
+import SemesterProject.Data;
 import java.util.ArrayList;
 import java.util.List;
 
 public class InventoryManager {
 
     private List<Part> inventory;
-    private DatabaseManager dbManager;
+    private Data dbManager;
 
-    public InventoryManager(DatabaseManager dbManager) {
+    public InventoryManager(Data dbManager) {
         this.inventory = new ArrayList<>();
         this.dbManager = dbManager;
     }

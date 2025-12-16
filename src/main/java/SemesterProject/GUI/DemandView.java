@@ -16,51 +16,36 @@ import java.util.ArrayList;
 public class DemandView extends VBox {
 
     private DemandManager demandManager;
+    private MainApp app;
     private TableView<DemandItem> table;
 
-    public DemandView(DemandManager manager) {
+    public DemandView(MainApp app, DemandManager manager) {
+        this.app = app;
         this.demandManager = manager;
         this.setPadding(new Insets(20));
         this.setSpacing(10);
+        this.setStyle("-fx-background-color: #ecf0f1;");
 
-        Label lblHeader = new Label("Demand List / Purchase Orders");
+        // Back Button
+        Button btnBack = new Button("⬅ Back to Dashboard");
+        btnBack.setOnAction(e -> app.showMainDashboard());
+
+        Label lblHeader = new Label("Demand List");
         lblHeader.setFont(Font.font("Arial", FontWeight.BOLD, 22));
 
         table = new TableView<>();
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
         TableColumn<DemandItem, String> colPart = new TableColumn<>("Part Name");
-        colPart.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getPart().getName()));
-
-        /*TableColumn<DemandItem, String> colSupplier = new TableColumn<>("Supplier");
-        colSupplier.setCellValueFactory(cellData -> {
-            if (cellData.getValue().getPart().getSupplier() != null) {
-                return new SimpleStringProperty(cellData.getValue().getPart().getSupplier().getName());
-            }
-            return new SimpleStringProperty("N/A");
-        });*/
+        colPart.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getPart().getName()));
 
         TableColumn<DemandItem, String> colQty = new TableColumn<>("Qty Needed");
-        colQty.setCellValueFactory(cellData ->
-                new SimpleStringProperty(String.valueOf(cellData.getValue().getQuantityNeeded())));
+        colQty.setCellValueFactory(cell -> new SimpleStringProperty(String.valueOf(cell.getValue().getQuantityNeeded())));
 
-        TableColumn<DemandItem, String> colCost = new TableColumn<>("Est. Cost");
-        colCost.setCellValueFactory(cellData ->
-                new SimpleStringProperty(String.valueOf(cellData.getValue().getTotalCost())));
+        table.getColumns().addAll(colPart, colQty);
 
-        table.getColumns().addAll(colPart, colQty, colCost);
+        this.getChildren().addAll(btnBack, lblHeader, table);
 
-        Button btnRefresh = new Button("Refresh Demands");
-        btnRefresh.setStyle("-fx-background-color: red; -fx-text-fill: white;");
-        btnRefresh.setOnAction(e -> refreshTable());
-
-        this.getChildren().addAll(lblHeader, btnRefresh, table);
-        refreshTable();
-    }
-
-    public void refreshTable() {
-        // SIMPLIFIED: No reflection needed. Just call the method directly.
         if (demandManager.getDemandList() != null) {
             table.getItems().setAll(demandManager.getDemandList());
         }
