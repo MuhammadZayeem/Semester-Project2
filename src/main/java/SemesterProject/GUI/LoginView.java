@@ -1,38 +1,45 @@
 package SemesterProject.GUI;
 
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
-public class LoginView extends VBox {
+public class LoginView {
 
-    private VBox loginContainer;
-    private VBox resetContainer;
     private MainApp app;
+    private GridPane rootLayout;
 
     public LoginView(MainApp app) {
         this.app = app;
-        this.setAlignment(Pos.CENTER);
-        this.setPadding(new Insets(40));
-        this.setSpacing(15);
-        this.setStyle("-fx-background-color: #f0f2f5;");
 
-        loginContainer = createLoginContainer();
-        resetContainer = createResetContainer();
-        resetContainer.setVisible(false);
-        resetContainer.setManaged(false);
+        // Initialize Root Layout (GridPane)
+        rootLayout = new GridPane();
+        rootLayout.setAlignment(Pos.CENTER);
+        rootLayout.setPadding(new Insets(40));
+        rootLayout.setVgap(15); // Vertical spacing between rows
+        rootLayout.setHgap(10);
+        rootLayout.setStyle("-fx-background-color: #f0f2f5;");
 
-        this.getChildren().addAll(loginContainer, resetContainer);
+        // Start with Login Form
+        showLoginForm();
     }
 
-    // --------------------------------------------------------------Login Container
-    private VBox createLoginContainer() {
-        VBox container = new VBox(15);
-        container.setAlignment(Pos.CENTER);
-        container.setPadding(new Insets(0));
+    // --- Critical Method to return the view to the Scene ---
+    public Parent getView() {
+        return rootLayout;
+    }
+
+    // =================================================================================
+    // FORM BUILDERS
+    // =================================================================================
+
+    private void showLoginForm() {
+        rootLayout.getChildren().clear(); // Clear previous view
 
         Label title = new Label("System Login");
         title.setFont(Font.font("Arial", FontWeight.BOLD, 24));
@@ -45,19 +52,17 @@ public class LoginView extends VBox {
         txtPass.setPromptText("Password");
         txtPass.setMaxWidth(250);
 
-        //--------------------------------------------------login button
         Button btnLogin = new Button("Login");
         btnLogin.setStyle("-fx-background-color: blue; -fx-text-fill: white; -fx-font-weight: bold;");
         btnLogin.setPrefWidth(250);
 
-        // -----------------------------------------------------------Forgot Password
         Hyperlink linkForgot = new Hyperlink("Forgot Password?");
         linkForgot.setStyle("-fx-font-size: 11px; -fx-text-fill: #3498db;");
 
         Label lblError = new Label();
         lblError.setStyle("-fx-text-fill: red;");
 
-        // Action for Login Button
+        // --- Actions ---
         btnLogin.setOnAction(e -> {
             boolean success = app.authenticate(txtUser.getText(), txtPass.getText());
             if (!success) {
@@ -65,20 +70,24 @@ public class LoginView extends VBox {
             }
         });
 
-        // Action for Forgot Password
-        linkForgot.setOnAction(e -> {
-            toggleView(false);
-            lblError.setText("");
-        });
-        container.getChildren().addAll(title, txtUser, txtPass, btnLogin, linkForgot, lblError);
-        return container;
+        linkForgot.setOnAction(e -> showResetForm());
+
+        // --- Add to Grid (Column 0, Row X) ---
+        rootLayout.add(title, 0, 0);
+        rootLayout.add(txtUser, 0, 1);
+        rootLayout.add(txtPass, 0, 2);
+        rootLayout.add(btnLogin, 0, 3);
+        rootLayout.add(linkForgot, 0, 4);
+        rootLayout.add(lblError, 0, 5);
+
+        // Center Align Everything
+        for (javafx.scene.Node node : rootLayout.getChildren()) {
+            GridPane.setHalignment(node, HPos.CENTER);
+        }
     }
 
-    // --- Password Reset Request Container (New GUI) ---
-    private VBox createResetContainer() {
-        VBox container = new VBox(15);
-        container.setAlignment(Pos.CENTER);
-        container.setPadding(new Insets(0));
+    private void showResetForm() {
+        rootLayout.getChildren().clear(); // Clear Login view
 
         Label title = new Label("Password Reset Request");
         title.setFont(Font.font("Arial", FontWeight.BOLD, 20));
@@ -96,7 +105,7 @@ public class LoginView extends VBox {
 
         Label lblStatus = new Label();
 
-        // Action for Request Reset Button
+        // --- Actions ---
         btnRequest.setOnAction(e -> {
             String username = txtUser.getText().trim();
             if (username.isEmpty()) {
@@ -106,7 +115,6 @@ public class LoginView extends VBox {
             }
             String resultMessage = app.requestPasswordReset(username);
 
-            // Set style based on success or failure message
             if (resultMessage.contains("not found") || resultMessage.contains("Only Staff") || resultMessage.contains("already exists")) {
                 lblStatus.setStyle("-fx-text-fill: red;");
             } else {
@@ -116,29 +124,18 @@ public class LoginView extends VBox {
             txtUser.clear();
         });
 
-        //-----------------------------------------------------Action for Back Link
-        linkBack.setOnAction(e -> {
-            toggleView(true);
-            lblStatus.setText("");
-            txtUser.clear();
-        });
+        linkBack.setOnAction(e -> showLoginForm());
 
-        container.getChildren().addAll(title, txtUser, btnRequest, linkBack, lblStatus);
-        return container;
-    }
+        // --- Add to Grid ---
+        rootLayout.add(title, 0, 0);
+        rootLayout.add(txtUser, 0, 1);
+        rootLayout.add(btnRequest, 0, 2);
+        rootLayout.add(linkBack, 0, 3);
+        rootLayout.add(lblStatus, 0, 4);
 
-    //----------------------------------------------Helper method to toggle between the two Boxes
-    private void toggleView(boolean showLogin) {
-        if (showLogin) {
-            loginContainer.setVisible(true);
-            loginContainer.setManaged(true);
-            resetContainer.setVisible(false);
-            resetContainer.setManaged(false);
-        } else {
-            loginContainer.setVisible(false);
-            loginContainer.setManaged(false);
-            resetContainer.setVisible(true);
-            resetContainer.setManaged(true);
+        // Center Align Everything
+        for (javafx.scene.Node node : rootLayout.getChildren()) {
+            GridPane.setHalignment(node, HPos.CENTER);
         }
     }
 }

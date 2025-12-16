@@ -4,25 +4,30 @@ import SemesterProject.Demand.DemandManager;
 import SemesterProject.Part;
 import SemesterProject.Sales.Sale;
 import SemesterProject.User;
+import javafx.scene.layout.GridPane; // Import GridPane
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 public class DashboardManager {
 
+    private MainApp app;
+    private User currentUser;
     private List<Part> PartList;
     private List<Sale> SaleList;
     private DemandManager demandManager;
 
-    // The View Class
+    // The View Wrapper Class
     private MainLayout view;
 
     public DashboardManager(MainApp app, User user, List<Part> PartList, List<Sale> SaleList, DemandManager demandManager) {
+        this.app = app;
+        this.currentUser = user;
         this.PartList = PartList;
         this.SaleList = SaleList;
         this.demandManager = demandManager;
 
-        // Instantiate the View
+        // Instantiate the Layout Wrapper
         this.view = new MainLayout(app, user);
     }
 
@@ -57,9 +62,10 @@ public class DashboardManager {
         view.updateMetrics(totalStock, lowStock, soldToday, demandCount);
     }
 
-    public MainLayout getView() {
-        updateDashboardData(); // Refresh before showing
-        return view;
+    // --- FIX: Return the actual GridPane, NOT the MainLayout object ---
+    public GridPane getView() {
+        updateDashboardData(); // Refresh data before showing
+        return view.getView(); // Calls MainLayout.getView() which returns the GridPane
     }
 
     public List<Sale> getSalesList() { return SaleList; }

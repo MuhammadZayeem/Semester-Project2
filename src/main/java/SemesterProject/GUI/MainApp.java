@@ -2,7 +2,6 @@ package SemesterProject.GUI;
 
 import SemesterProject.Body.*;
 import SemesterProject.Exception.UserCreationException;
-//import SemesterProject.InventoryManagment.InventoryManager;
 import SemesterProject.Login.Admin;
 import SemesterProject.Login.LoginManager;
 import SemesterProject.Data;
@@ -11,7 +10,6 @@ import SemesterProject.Sales.Sale;
 import SemesterProject.User;
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 import SemesterProject.Demand.DemandManager;
 import SemesterProject.Login.PasswordResetRequest;
@@ -28,7 +26,6 @@ public class MainApp extends Application {
     private User currentUser;
 
     // Managers
-    //private InventoryManager inventoryManager;
     private DemandManager demandManager;
     private DashboardManager dashboardManager;
     private LoginManager loginManager;
@@ -48,7 +45,6 @@ public class MainApp extends Application {
     private void initializeData() throws UserCreationException {
         dbManager = new Data();
         loginManager = new LoginManager(dbManager);
-      //  inventoryManager = new InventoryManager(dbManager);
         demandManager = new DemandManager();
         loadAndPopulateData();
     }
@@ -67,8 +63,8 @@ public class MainApp extends Application {
         }
         masterSaleList.clear();
         masterSaleList.addAll(dbManager.getAllSales());
-       // inventoryManager.getInventory().clear();
-        //inventoryManager.getInventory().addAll(masterPartList);
+
+        // Initial Demand Check
         demandManager.addDemands(masterPartList);
     }
 
@@ -87,7 +83,7 @@ public class MainApp extends Application {
 
     public void showLoginScreen() {
         LoginView loginView = new LoginView(this);
-        Scene scene = new Scene(loginView, 400, 300);
+        Scene scene = new Scene(loginView.getView(), 400, 300);
         primaryStage.setTitle("IMS Login");
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -106,7 +102,7 @@ public class MainApp extends Application {
     }
 
     // =================================================================================
-    // NAVIGATION METHODS (REPLACING SIDEBAR)
+    // NAVIGATION METHODS
     // =================================================================================
 
     public void showMainDashboard() {
@@ -124,13 +120,13 @@ public class MainApp extends Application {
 
     public void showSalesHistory() {
         SalesView view = new SalesView(this, masterSaleList);
-        primaryStage.getScene().setRoot(view);
+        primaryStage.getScene().setRoot(view.getView());
     }
 
     public void showDemandList() {
         demandManager.addDemands(masterPartList);
         DemandView view = new DemandView(this, demandManager);
-        primaryStage.getScene().setRoot(view);
+        primaryStage.getScene().setRoot(view.getView());
     }
 
     public void showUserManagement() {
@@ -142,24 +138,31 @@ public class MainApp extends Application {
     // ACTIONS
     // =================================================================================
 
-  /*  public void addUserPart(Part newPart) throws Exception {
+    public void addUserPart(Part newPart) throws Exception {
         dbManager.addPart(newPart);
         masterPartList.add(newPart);
-        inventoryManager.getInventory().add(newPart);
+        // Recalculate demands since a new part is added
         demandManager.addDemands(masterPartList);
         dashboardManager.updateDashboardData();
-    }*/
+    }
 
-  /*  public void increaseStock(Part part) {
+    public void increaseStock(Part part) {
         try {
             int newStock = part.getCurrentStock() + 1;
             part.setCurrentStock(newStock);
-            inventoryManager.updateStock(part, 1);
+
+            // Note: Since Data class is in-memory, updating the object 'part'
+            // directly updates it in the list. We don't strictly need a dbManager.update()
+            // call unless you add SQL back later.
+            //dbManager.updatePart(part);
+
             demandManager.addDemands(masterPartList);
             dashboardManager.updateDashboardData();
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            System.err.println("Error increasing stock: " + e.getMessage());
+        }
     }
-*/
+
     public void recordSale(Part part) {
         try {
             int newStock = part.getCurrentStock() - 1;
@@ -167,10 +170,13 @@ public class MainApp extends Application {
 
             String userId = currentUser != null ? currentUser.getUserId() : "U00";
             Sale newSale = new Sale(part.getName(), 1, part.getUnitPrice());
+
             dbManager.addSale(newSale, part.getPartId(), userId);
             masterSaleList.add(newSale);
 
             part.setCurrentStock(newStock);
+            // dbManager.updatePart(part); // Optional for memory-only, good practice
+
             demandManager.addDemands(masterPartList);
             dashboardManager.updateDashboardData();
 
@@ -197,9 +203,9 @@ public class MainApp extends Application {
         return false;
     }
     public boolean removeUser(String username) throws UserNotFoundException { return dbManager.removeUser(username); }
-    public boolean updateUserDetails(String old, String newU, String newN) throws UserAlreadyExistsException {
-        return dbManager.updateUserDetails(old, newU, newN);
-    }
+ /*   public boolean updateUserDetails(String old, String newU, String newN) throws UserAlreadyExistsException {
+        return dbManager.updateUserDetails(old, newU);
+    }*/
 
     public static void main(String[] args) { launch(args); }
     public void addUser(User newUser) {}

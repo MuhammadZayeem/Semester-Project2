@@ -4,17 +4,23 @@ import SemesterProject.Sales.Sale;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import java.util.List;
 
-public class SalesView extends VBox {
+public class SalesView {
+
+    // The main layout container (GridPane)
+    private GridPane layout;
 
     private TableView<Sale> table;
     private List<Sale> SaleList;
@@ -23,19 +29,30 @@ public class SalesView extends VBox {
     public SalesView(MainApp app, List<Sale> masterSaleList) {
         this.app = app;
         this.SaleList = masterSaleList;
-        this.setPadding(new Insets(20));
-        this.setSpacing(10);
-        this.setStyle("-fx-background-color: #ecf0f1;");
 
-        // Back Button
+        // Initialize Layout (GridPane)
+        layout = new GridPane();
+        layout.setAlignment(Pos.CENTER);
+        layout.setPadding(new Insets(20));
+        layout.setVgap(15); // Vertical spacing between rows
+        layout.setHgap(10);
+        layout.setStyle("-fx-background-color: #ecf0f1;");
+
+        // 1. Back Button
         Button btnBack = new Button("⬅ Back to Dashboard");
+        btnBack.setStyle("-fx-background-color: transparent; -fx-text-fill: #7f8c8d; -fx-font-size: 14px; -fx-cursor: hand;");
         btnBack.setOnAction(e -> app.showMainDashboard());
 
+        // 2. Header
         Label lblHeader = new Label("Sales History & Transactions");
         lblHeader.setFont(Font.font("Arial", FontWeight.BOLD, 22));
+        lblHeader.setStyle("-fx-text-fill: #2c3e50;");
 
+        // 3. Table Setup
         table = new TableView<>();
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        GridPane.setHgrow(table, Priority.ALWAYS); // Ensure table expands horizontally
+        GridPane.setVgrow(table, Priority.ALWAYS); // Ensure table expands vertically
 
         TableColumn<Sale, String> colDate = new TableColumn<>("Date");
         colDate.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getFormattedSaleDate()));
@@ -45,14 +62,33 @@ public class SalesView extends VBox {
 
         TableColumn<Sale, String> colQuantity = new TableColumn<>("Qty");
         colQuantity.setCellValueFactory(data -> new SimpleStringProperty(String.valueOf(data.getValue().getQuantitySold())));
+        colQuantity.setStyle("-fx-alignment: CENTER;");
 
         TableColumn<Sale, String> colCost = new TableColumn<>("Total Cost");
         colCost.setCellValueFactory(data -> new SimpleStringProperty(String.format("%.2f", data.getValue().getCost())));
+        colCost.setStyle("-fx-alignment: CENTER-RIGHT;");
 
         table.getColumns().addAll(colDate, colPart, colQuantity, colCost);
 
-        this.getChildren().addAll(btnBack, lblHeader, table);
+        // --- ADDING TO GRID ---
+
+        // Row 0: Back Button (Left Aligned)
+        layout.add(btnBack, 0, 0);
+        GridPane.setHalignment(btnBack, HPos.LEFT);
+
+        // Row 1: Header (Centered)
+        layout.add(lblHeader, 0, 1);
+        GridPane.setHalignment(lblHeader, HPos.CENTER);
+
+        // Row 2: Table (Fills space)
+        layout.add(table, 0, 2);
+
         refreshTable();
+    }
+
+    // --- Critical Method to return the view ---
+    public GridPane getView() {
+        return layout;
     }
 
     public void refreshTable() {
