@@ -21,59 +21,48 @@ public class CategorizedInventoryView extends GridPane {
         this.masterPartList = masterPartList;
         this.app = app;
 
-        setPadding(new Insets(30));
+        setPadding(new Insets(20));
         setHgap(20);
         setVgap(20);
         setAlignment(Pos.CENTER);
-        setStyle("-fx-background-color: #ecf0f1;"); // Light grey background
+        setStyle("-fx-background-color: #ecf0f1;");
 
         showLevel1_Categories();
     }
 
     private void clearGrid() { getChildren().clear(); }
 
-    // =================================================================================
-    // LEVEL 1: CATEGORY SELECTION (Updated to use Colored Tiles)
-    // =================================================================================
+    // LEVEL 1: CATEGORY
     public void showLevel1_Categories() {
         clearGrid();
 
         Label title = new Label("Select Category");
-        title.setFont(Font.font("Arial", FontWeight.BOLD, 32));
-        title.setStyle("-fx-text-fill: #2c3e50;");
+        title.setFont(Font.font("Arial", FontWeight.BOLD, 30));
 
-        // Create Colored Tiles
-        Button btnBody = createTileButton("🚗 Body Parts", "#3498db"); // Blue
+        Button btnBody = createMainButton("Body Parts");
         btnBody.setOnAction(e -> showLevel2_SubTypes("Body"));
 
-        Button btnEngine = createTileButton("⚙️ Engine Parts", "#e67e22"); // Orange
-        btnEngine.setOnAction(e -> showLevel2_SubTypes("Engine")); // Placeholder for now
-
-        // Back Button
-        Button btnBack = createBackButton("⬅ Back to Dashboard");
+        // --- ADDED BACK BUTTON HERE ---
+        Button btnBack = new Button("⬅ Back to Dashboard");
         btnBack.setOnAction(e -> app.showMainDashboard());
 
-        // Layout
-        add(title, 0, 0, 2, 1); // Span 2 columns
+        add(title, 0, 0);
         setHalignment(title, javafx.geometry.HPos.CENTER);
 
         add(btnBody, 0, 1);
-        add(btnEngine, 1, 1);
+        setHalignment(btnBody, javafx.geometry.HPos.CENTER);
 
-        add(btnBack, 0, 2, 2, 1); // Span 2 columns
+        // Add Back Button at Row 2
+        add(btnBack, 0, 2);
         setHalignment(btnBack, javafx.geometry.HPos.CENTER);
     }
 
-    // =================================================================================
     // LEVEL 2: SUB-CATEGORIES
-    // =================================================================================
     public void showLevel2_SubTypes(String category) {
         clearGrid();
 
         Label title = new Label(category + " Parts");
-        title.setFont(Font.font("Arial", FontWeight.BOLD, 28));
-        title.setStyle("-fx-text-fill: #2c3e50;");
-
+        title.setFont(Font.font("Arial", FontWeight.BOLD, 24));
         add(title, 0, 0);
         setHalignment(title, javafx.geometry.HPos.CENTER);
 
@@ -84,49 +73,45 @@ public class CategorizedInventoryView extends GridPane {
         int row = 1;
         for (String type : subTypes) {
             String displayName = type.replaceAll("(.)([A-Z])", "$1 $2");
-            // Use a distinct color for sub-items (Purple)
-            Button btn = createWideButton(displayName, "#9b59b6");
+            Button btn = new Button(displayName);
+            btn.setPrefWidth(300);
+            btn.setFont(Font.font(16));
             btn.setOnAction(e -> showLevel3_PartTable(type, displayName, category));
-
             add(btn, 0, row++);
             setHalignment(btn, javafx.geometry.HPos.CENTER);
         }
 
-        Button btnBack = createBackButton("⬅ Back");
+        Button btnBack = new Button("⬅ Back");
         btnBack.setOnAction(e -> showLevel1_Categories());
         add(btnBack, 0, row);
         setHalignment(btnBack, javafx.geometry.HPos.CENTER);
     }
 
-    // =================================================================================
     // LEVEL 3: PART TABLE
-    // =================================================================================
     public void showLevel3_PartTable(String rawType, String displayName, String category) {
         clearGrid();
 
         Label title = new Label(displayName + " Inventory");
-        title.setFont(Font.font("Arial", FontWeight.BOLD, 24));
-        title.setStyle("-fx-text-fill: #2c3e50;");
+        title.setFont(Font.font("Arial", FontWeight.BOLD, 22));
 
         TableView<Part> table = new TableView<>();
-        table.setPrefHeight(400);
-        table.setPrefWidth(600);
-        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        table.setPrefHeight(350);
 
         TableColumn<Part, String> nameCol = new TableColumn<>("Part Name");
         nameCol.setCellValueFactory(d -> new javafx.beans.property.SimpleStringProperty(d.getValue().getName()));
+        nameCol.setPrefWidth(200);
 
         TableColumn<Part, Number> qtyCol = new TableColumn<>("Quantity");
         qtyCol.setCellValueFactory(d -> new javafx.beans.property.SimpleIntegerProperty(d.getValue().getCurrentStock()));
-        qtyCol.setStyle("-fx-alignment: CENTER;");
+        qtyCol.setPrefWidth(100);
 
         TableColumn<Part, Number> priceCol = new TableColumn<>("Unit Price");
         priceCol.setCellValueFactory(d -> new javafx.beans.property.SimpleDoubleProperty(d.getValue().getUnitPrice()));
-        priceCol.setStyle("-fx-alignment: CENTER-RIGHT;");
+        priceCol.setPrefWidth(120);
 
         TableColumn<Part, Number> totalCol = new TableColumn<>("Total Value");
         totalCol.setCellValueFactory(d -> new javafx.beans.property.SimpleDoubleProperty(d.getValue().getCurrentStock()*d.getValue().getUnitPrice()));
-        totalCol.setStyle("-fx-alignment: CENTER-RIGHT;");
+        totalCol.setPrefWidth(150);
 
         table.getColumns().addAll(nameCol, qtyCol, priceCol, totalCol);
 
@@ -142,7 +127,6 @@ public class CategorizedInventoryView extends GridPane {
 
         Label summary = new Label("Total Qty: " + totalQty + " | Total Value: $" + String.format("%.2f", totalValue));
         summary.setFont(Font.font("Arial", FontWeight.BOLD, 16));
-        summary.setStyle("-fx-text-fill: #7f8c8d;");
 
         table.setRowFactory(tv -> {
             TableRow<Part> row = new TableRow<>();
@@ -150,17 +134,17 @@ public class CategorizedInventoryView extends GridPane {
             return row;
         });
 
-        Button btnBack = createBackButton("⬅ Back");
+        Button btnBack = new Button("⬅ Back");
         btnBack.setOnAction(e -> showLevel2_SubTypes(category));
 
-        Button btnAdd = createWideButton("➕ Add New Part", "#27ae60"); // Green
+        Button btnAdd = new Button("➕ Add New Part");
         btnAdd.setOnAction(e -> showAddPartDialog(category));
 
         add(title, 0, 0);
         add(table, 0, 1);
         add(summary, 0, 2);
-        add(btnAdd, 0, 3);
-        add(btnBack, 0, 4);
+        add(btnBack, 0, 3);
+        add(btnAdd, 0, 4);
 
         setHalignment(title, javafx.geometry.HPos.CENTER);
         setHalignment(summary, javafx.geometry.HPos.CENTER);
@@ -168,66 +152,7 @@ public class CategorizedInventoryView extends GridPane {
         setHalignment(btnAdd, javafx.geometry.HPos.CENTER);
     }
 
-    // =================================================================================
-    // STYLING HELPERS (THIS MAKES THEM LOOK LIKE TILES)
-    // =================================================================================
-
-    // 1. Square/Rectangular Tile Button (For Categories)
-    private Button createTileButton(String text, String colorHex) {
-        Button btn = new Button(text);
-        btn.setPrefSize(200, 120); // Big Tile Size
-        btn.setStyle(
-                "-fx-background-color: " + colorHex + ";" +
-                        "-fx-text-fill: white;" +
-                        "-fx-font-size: 20px;" +
-                        "-fx-font-weight: bold;" +
-                        "-fx-background-radius: 10;" +
-                        "-fx-cursor: hand;" +
-                        "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 1);"
-        );
-
-        // Hover
-        btn.setOnMouseEntered(e -> btn.setStyle("-fx-background-color: derive(" + colorHex + ", -10%); -fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 1);"));
-        btn.setOnMouseExited(e -> btn.setStyle("-fx-background-color: " + colorHex + "; -fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 1);"));
-
-        return btn;
-    }
-
-    // 2. Wide Button (For Lists)
-    private Button createWideButton(String text, String colorHex) {
-        Button btn = new Button(text);
-        btn.setPrefSize(300, 50);
-        btn.setStyle(
-                "-fx-background-color: " + colorHex + ";" +
-                        "-fx-text-fill: white;" +
-                        "-fx-font-size: 16px;" +
-                        "-fx-font-weight: bold;" +
-                        "-fx-background-radius: 5;" +
-                        "-fx-cursor: hand;"
-        );
-        btn.setOnMouseEntered(e -> btn.setStyle("-fx-background-color: derive(" + colorHex + ", -10%); -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 5;"));
-        btn.setOnMouseExited(e -> btn.setStyle("-fx-background-color: " + colorHex + "; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 5;"));
-        return btn;
-    }
-
-    // 3. Simple Back Button
-    private Button createBackButton(String text) {
-        Button btn = new Button(text);
-        btn.setStyle(
-                "-fx-background-color: #bdc3c7;" +
-                        "-fx-text-fill: #2c3e50;" +
-                        "-fx-font-size: 14px;" +
-                        "-fx-background-radius: 5;" +
-                        "-fx-cursor: hand;"
-        );
-        btn.setPadding(new Insets(8, 20, 8, 20));
-        return btn;
-    }
-
-    // =================================================================================
-    // DIALOGS & LOGIC
-    // =================================================================================
-
+    // ADD NEW PART (using reflection)
     private void showAddPartDialog(String category) {
         Dialog<Void> dialog = new Dialog<>();
         dialog.setTitle("Add New Part");
@@ -262,8 +187,9 @@ public class CategorizedInventoryView extends GridPane {
                     String model = tfModel.getText();
                     double price = Double.parseDouble(tfPrice.getText());
                     int qty = Integer.parseInt(tfQty.getText());
-                    int threshold = 5;
+                    int threshold = 5; // default
 
+                    // Reflection to create object dynamically
                     String className = "SemesterProject.Body." + type;
                     Class<?> clazz = Class.forName(className);
                     Constructor<?> constructor = clazz.getConstructor(
@@ -272,6 +198,8 @@ public class CategorizedInventoryView extends GridPane {
                     Part newPart = (Part) constructor.newInstance(type + "-" + name, name, model, qty, threshold, price);
 
                     masterPartList.add(newPart);
+
+                    // Refresh table for this exact type
                     showLevel3_PartTable(type, type.replaceAll("(.)([A-Z])", "$1 $2"), "Body");
 
                 } catch (Exception ex){
@@ -284,6 +212,7 @@ public class CategorizedInventoryView extends GridPane {
         dialog.showAndWait();
     }
 
+    // QUICK STOCK ADJUST DIALOG
     private void showQuickStockDialog(Part part, String rawType, String category) {
         Dialog<Void> dialog = new Dialog<>();
         dialog.setTitle("Update Stock");
@@ -293,22 +222,9 @@ public class CategorizedInventoryView extends GridPane {
         qty.setFont(Font.font("Arial", FontWeight.BOLD, 16));
 
         Button plus = new Button("➕ Add 1");
-        Button minus = new Button("➖ Sale 1");
-
-        // --- ACTION LOGIC LINKED TO MAIN APP ---
-        plus.setOnAction(e -> {
-            app.increaseStock(part);
-            qty.setText("Current Qty: " + part.getCurrentStock());
-        });
-
-        minus.setOnAction(e -> {
-            if(part.getCurrentStock() > 0){
-                app.recordSale(part); // Calls the logic that handles demand automatically
-                qty.setText("Current Qty: " + part.getCurrentStock());
-            } else {
-                new Alert(Alert.AlertType.ERROR, "Out of Stock!").showAndWait();
-            }
-        });
+        Button minus = new Button("➖ Remove 1");
+        plus.setOnAction(e -> { part.addQuantity(1); qty.setText("Current Qty: " + part.getCurrentStock()); });
+        minus.setOnAction(e -> { if(part.getCurrentStock() > 0){ part.addQuantity(-1); qty.setText("Current Qty: " + part.getCurrentStock()); } });
 
         HBox buttons = new HBox(15, minus, plus); buttons.setAlignment(Pos.CENTER);
         VBox content = new VBox(15, qty, buttons); content.setAlignment(Pos.CENTER); content.setPadding(new Insets(20));
@@ -318,5 +234,12 @@ public class CategorizedInventoryView extends GridPane {
         dialog.showAndWait();
 
         showLevel3_PartTable(rawType, rawType.replaceAll("(.)([A-Z])", "$1 $2"), category);
+    }
+
+    private Button createMainButton(String text) {
+        Button btn = new Button(text);
+        btn.setPrefSize(260, 70);
+        btn.setFont(Font.font("Arial", FontWeight.BOLD, 18));
+        return btn;
     }
 }

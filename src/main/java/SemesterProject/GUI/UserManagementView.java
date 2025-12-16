@@ -33,7 +33,7 @@ public class UserManagementView extends StackPane {
 
     public UserManagementView(MainApp app, User currentUser) {
         this.app = app;
-        this.setStyle("-fx-background-color: #f4f6f7;"); // Light grey background
+        this.setStyle("-fx-background-color: #ecf0f1;"); // Standard Inventory Grey Background
         this.setPadding(new Insets(20));
 
         if (!(currentUser instanceof Admin)) {
@@ -56,7 +56,7 @@ public class UserManagementView extends StackPane {
     }
 
     // =================================================================================
-    // 1. MAIN MENU (GRID PANE)
+    // 1. MAIN MENU (VERTICAL LIST - Like Inventory View)
     // =================================================================================
     private void showMainMenu() {
         contentArea.getChildren().clear();
@@ -66,46 +66,44 @@ public class UserManagementView extends StackPane {
         lblTitle.setFont(Font.font("Arial", FontWeight.BOLD, 30));
         lblTitle.setStyle("-fx-text-fill: #2c3e50;");
 
-        // --- GRID PANE FOR MENU BUTTONS ---
+        // --- GRID PANE FOR VERTICAL LIST ---
         GridPane menuGrid = new GridPane();
         menuGrid.setAlignment(Pos.CENTER);
-        menuGrid.setHgap(20);
-        menuGrid.setVgap(20);
+        menuGrid.setVgap(15); // Space between buttons
 
         // 1. Registered Users
-        Button btnList = createMenuButton("Registered Users", "#ecf0f1", "#2c3e50");
+        Button btnList = createWideMenuButton("Registered Users");
         btnList.setOnAction(e -> showRegisteredUsers());
 
         // 2. Password Reset Requests
-        Button btnRequests = createMenuButton("Reset Requests", "#ecf0f1", "#2c3e50");
+        Button btnRequests = createWideMenuButton("Password Reset Requests");
         btnRequests.setOnAction(e -> showResetRequests());
 
         // 3. Direct Password Reset
-        Button btnDirect = createMenuButton("Direct Reset", "#ecf0f1", "#2c3e50");
+        Button btnDirect = createWideMenuButton("Direct Password Reset");
         btnDirect.setOnAction(e -> showDirectResetForm());
 
         // 4. Remove User
-        Button btnRemove = createMenuButton("Remove User", "#ecf0f1", "#2c3e50"); // Red
+        Button btnRemove = createWideMenuButton("Remove User");
         btnRemove.setOnAction(e -> showRemoveUserForm());
 
         // 5. Add User
-        Button btnAdd = createMenuButton("Add New User", "#2ecc71", "white"); // Green
+        Button btnAdd = createWideMenuButton("Add New User");
         btnAdd.setOnAction(e -> showAddUserForm());
 
-        // Adding to Grid (Col, Row)
-        // Row 0
+        // Adding to Grid (Single Column)
         menuGrid.add(btnList, 0, 0);
-        menuGrid.add(btnRequests, 1, 0);
+        menuGrid.add(btnRequests, 0, 1);
+        menuGrid.add(btnDirect, 0, 2);
+        menuGrid.add(btnRemove, 0, 3);
+        menuGrid.add(btnAdd, 0, 4);
 
-        // Row 1
-        menuGrid.add(btnDirect, 0, 1);
-        menuGrid.add(btnRemove, 1, 1);
+        // Center Alignment for buttons in grid
+        for (javafx.scene.Node node : menuGrid.getChildren()) {
+            GridPane.setHalignment(node, javafx.geometry.HPos.CENTER);
+        }
 
-        // Row 2 (Spanning 2 columns for "Add User")
-        menuGrid.add(btnAdd, 0, 2, 2, 1);
-        btnAdd.setMaxWidth(Double.MAX_VALUE); // Stretch to fill
-
-        // --- ADDED: Back to Dashboard Button ---
+        // --- BACK BUTTON ---
         Button btnBack = new Button("⬅ Back to Dashboard");
         btnBack.setStyle("-fx-background-color: transparent; -fx-text-fill: #7f8c8d; -fx-font-size: 14px; -fx-cursor: hand;");
         btnBack.setOnAction(e -> app.showMainDashboard());
@@ -178,6 +176,7 @@ public class UserManagementView extends StackPane {
         VBox.setVgrow(resetTable, Priority.ALWAYS);
 
         Button btnRefresh = new Button("Refresh List");
+        btnRefresh.setStyle("-fx-background-color: #9b59b6; -fx-text-fill: white;");
         btnRefresh.setOnAction(e -> refreshResetTable());
 
         refreshResetTable();
@@ -186,7 +185,7 @@ public class UserManagementView extends StackPane {
     }
 
     // =================================================================================
-    // SCENE 3: DIRECT RESET FORM (GRID PANE)
+    // SCENE 3: DIRECT RESET FORM
     // =================================================================================
     private void showDirectResetForm() {
         contentArea.getChildren().clear();
@@ -194,13 +193,13 @@ public class UserManagementView extends StackPane {
         GridPane formGrid = createFormGrid();
 
         Label lblTitle = new Label("Direct Password Reset");
-        lblTitle.setFont(Font.font("Arial", FontWeight.BOLD, 18));
+        lblTitle.setFont(Font.font("Arial", FontWeight.BOLD, 22));
 
         TextField txtUser = new TextField(); txtUser.setPromptText("Target Username");
         PasswordField txtPass = new PasswordField(); txtPass.setPromptText("New Password");
 
         Button btnReset = new Button("Reset Password");
-        btnReset.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;");
+        btnReset.setStyle("-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px;");
         btnReset.setMaxWidth(Double.MAX_VALUE);
 
         btnReset.setOnAction(e -> {
@@ -215,7 +214,6 @@ public class UserManagementView extends StackPane {
             txtUser.clear(); txtPass.clear();
         });
 
-        // Add to Grid
         formGrid.add(new Label("Username:"), 0, 0);
         formGrid.add(txtUser, 1, 0);
         formGrid.add(new Label("New Password:"), 0, 1);
@@ -227,7 +225,7 @@ public class UserManagementView extends StackPane {
     }
 
     // =================================================================================
-    // SCENE 4: REMOVE USER FORM (GRID PANE)
+    // SCENE 4: REMOVE USER FORM
     // =================================================================================
     private void showRemoveUserForm() {
         contentArea.getChildren().clear();
@@ -235,12 +233,12 @@ public class UserManagementView extends StackPane {
         GridPane formGrid = createFormGrid();
 
         Label lblTitle = new Label("Remove User");
-        lblTitle.setFont(Font.font("Arial", FontWeight.BOLD, 18));
+        lblTitle.setFont(Font.font("Arial", FontWeight.BOLD, 22));
 
         TextField txtUser = new TextField(); txtUser.setPromptText("Username to Remove");
 
         Button btnRemove = new Button("Delete User");
-        btnRemove.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold;");
+        btnRemove.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px;");
         btnRemove.setMaxWidth(Double.MAX_VALUE);
 
         btnRemove.setOnAction(e -> {
@@ -255,7 +253,6 @@ public class UserManagementView extends StackPane {
             }
         });
 
-        // Add to Grid
         formGrid.add(new Label("Username:"), 0, 0);
         formGrid.add(txtUser, 1, 0);
         formGrid.add(btnRemove, 1, 1);
@@ -265,7 +262,7 @@ public class UserManagementView extends StackPane {
     }
 
     // =================================================================================
-    // SCENE 5: ADD USER FORM (GRID PANE)
+    // SCENE 5: ADD USER FORM
     // =================================================================================
     private void showAddUserForm() {
         contentArea.getChildren().clear();
@@ -273,7 +270,7 @@ public class UserManagementView extends StackPane {
         GridPane formGrid = createFormGrid();
 
         Label lblTitle = new Label("Add New User");
-        lblTitle.setFont(Font.font("Arial", FontWeight.BOLD, 18));
+        lblTitle.setFont(Font.font("Arial", FontWeight.BOLD, 22));
 
         TextField txtUser = new TextField(); txtUser.setPromptText("Username");
         PasswordField txtPass = new PasswordField(); txtPass.setPromptText("Password");
@@ -282,7 +279,7 @@ public class UserManagementView extends StackPane {
         cmbRole.setMaxWidth(Double.MAX_VALUE);
 
         Button btnAdd = new Button("Create User");
-        btnAdd.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold;");
+        btnAdd.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px;");
         btnAdd.setMaxWidth(Double.MAX_VALUE);
 
         btnAdd.setOnAction(e -> {
@@ -311,16 +308,12 @@ public class UserManagementView extends StackPane {
             }
         });
 
-        // Add to Grid (Label -> Field alignment)
         formGrid.add(new Label("Username:"), 0, 0);
         formGrid.add(txtUser, 1, 0);
-
         formGrid.add(new Label("Password:"), 0, 1);
         formGrid.add(txtPass, 1, 1);
-
         formGrid.add(new Label("Role:"), 0, 2);
         formGrid.add(cmbRole, 1, 2);
-
         formGrid.add(btnAdd, 1, 3);
 
         VBox container = wrapFormInBox(lblTitle, formGrid);
@@ -328,10 +321,43 @@ public class UserManagementView extends StackPane {
     }
 
     // =================================================================================
-    // HELPERS & STYLING
+    // HELPERS & STYLING (MATCHING INVENTORY VIEW)
     // =================================================================================
 
-    // Helper to create the standard 2-column Grid for forms
+    private Button createWideMenuButton(String text) {
+        Button btn = new Button(text);
+        btn.setPrefSize(300, 50); // Wide like Inventory list
+        btn.setStyle(
+                "-fx-background-color: #ecf0f1;" + // Light grey like inventory buttons
+                        "-fx-text-fill: #2c3e50;" +
+                        "-fx-font-size: 16px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-background-radius: 5;" +
+                        "-fx-border-color: #bdc3c7;" +
+                        "-fx-border-radius: 5;" +
+                        "-fx-cursor: hand;"
+        );
+        // Hover
+        btn.setOnMouseEntered(e -> btn.setStyle("-fx-background-color: #d5dbdb; -fx-text-fill: #2c3e50; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 5; -fx-border-color: #bdc3c7; -fx-border-radius: 5;"));
+        btn.setOnMouseExited(e -> btn.setStyle("-fx-background-color: #ecf0f1; -fx-text-fill: #2c3e50; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 5; -fx-border-color: #bdc3c7; -fx-border-radius: 5;"));
+        return btn;
+    }
+
+    private Button createBackButton() {
+        Button btn = new Button("⬅ Back");
+        btn.setStyle(
+                "-fx-background-color: #bdc3c7;" +
+                        "-fx-text-fill: #2c3e50;" +
+                        "-fx-font-size: 14px;" +
+                        "-fx-background-radius: 5;" +
+                        "-fx-cursor: hand;"
+        );
+        btn.setPadding(new Insets(8, 20, 8, 20));
+        btn.setOnAction(e -> showMainMenu());
+        VBox.setMargin(btn, new Insets(20, 0, 0, 0));
+        return btn;
+    }
+
     private GridPane createFormGrid() {
         GridPane grid = new GridPane();
         grid.setHgap(15);
@@ -340,7 +366,6 @@ public class UserManagementView extends StackPane {
         return grid;
     }
 
-    // Helper to wrap the title and the grid inside a pretty white box
     private VBox wrapFormInBox(Label title, GridPane grid) {
         VBox box = new VBox(20);
         box.setMaxWidth(450);
@@ -348,42 +373,6 @@ public class UserManagementView extends StackPane {
         box.setAlignment(Pos.CENTER);
         box.getChildren().addAll(title, grid);
         return box;
-    }
-
-    private Button createMenuButton(String text, String bgColor, String textColor) {
-        Button btn = new Button(text);
-        btn.setPrefSize(200, 80); // Rectangular Tile shape
-        btn.setStyle(
-                "-fx-background-color: " + bgColor + ";" +
-                        "-fx-text-fill: " + textColor + ";" +
-                        "-fx-font-size: 16px;" +
-                        "-fx-font-weight: bold;" +
-                        "-fx-background-radius: 5;" +
-                        "-fx-border-color: #bdc3c7;" +
-                        "-fx-border-radius: 5;" +
-                        "-fx-cursor: hand;"
-        );
-        btn.setOnMouseEntered(e -> btn.setStyle("-fx-background-color: #d5dbdb; -fx-text-fill: " + textColor + "; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 5; -fx-border-color: #bdc3c7; -fx-border-radius: 5;"));
-        btn.setOnMouseExited(e -> btn.setStyle("-fx-background-color: " + bgColor + "; -fx-text-fill: " + textColor + "; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 5; -fx-border-color: #bdc3c7; -fx-border-radius: 5;"));
-        return btn;
-    }
-
-    private Button createBackButton() {
-        Button btn = new Button("⬅ Back");
-        btn.setStyle(
-                "-fx-background-color: #e0e0e0;" +
-                        "-fx-text-fill: #333;" +
-                        "-fx-font-size: 14px;" +
-                        "-fx-background-radius: 5;" +
-                        "-fx-border-color: #ccc;" +
-                        "-fx-border-radius: 5;" +
-                        "-fx-cursor: hand;"
-        );
-        btn.setPadding(new Insets(5, 20, 5, 20));
-        btn.setOnAction(e -> showMainMenu());
-
-        VBox.setMargin(btn, new Insets(20, 0, 0, 0));
-        return btn;
     }
 
     public void refreshUserTable() {

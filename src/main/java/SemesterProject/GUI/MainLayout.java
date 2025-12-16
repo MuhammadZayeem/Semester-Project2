@@ -45,10 +45,10 @@ public class MainLayout extends VBox {
         lblSoldToday = createDataLabel("0");
         lblPendingDemands = createDataLabel("0");
 
-        statsGrid.add(createStatsTile("Total Parts", lblTotalStock, "#3498db"), 0, 0); // Blue
-        statsGrid.add(createStatsTile("Low Stock", lblLowStock, "#e74c3c"), 1, 0);     // Red
-        statsGrid.add(createStatsTile("Sold Today", lblSoldToday, "#27ae60"), 2, 0);   // Green
-        statsGrid.add(createStatsTile("Demands", lblPendingDemands, "#f39c12"), 3, 0); // Orange
+        statsGrid.add(createStatsTile("Total Parts", lblTotalStock, "#34495e"), 0, 0); // Blue
+        statsGrid.add(createStatsTile("Low Stock", lblLowStock, "#34495e"), 1, 0);     // Red
+        statsGrid.add(createStatsTile("Sold Today", lblSoldToday, "#34495e"), 2, 0);   // Green
+        statsGrid.add(createStatsTile("Demands", lblPendingDemands, "#34495e"), 3, 0); // Orange
 
         // --- 3. NAVIGATION MENU (Bottom Grid) ---
         GridPane navGrid = new GridPane();
@@ -56,16 +56,16 @@ public class MainLayout extends VBox {
         navGrid.setVgap(20);
         navGrid.setAlignment(Pos.CENTER);
 
-        Button btnInventory = createNavButton("📦 Inventory", "#34495e");
+        Button btnInventory = createNavButton("Inventory", "#34495e");
         btnInventory.setOnAction(e -> app.showInventoryView());
 
-        Button btnSales = createNavButton("💰 Sales History", "#34495e");
+        Button btnSales = createNavButton("Sales History", "#34495e");
         btnSales.setOnAction(e -> app.showSalesHistory());
 
-        Button btnDemand = createNavButton("📋 Demand List", "#34495e");
+        Button btnDemand = createNavButton("Demand List", "#34495e");
         btnDemand.setOnAction(e -> app.showDemandList());
 
-        Button btnLogout = createNavButton("🚪 Logout", "#e74c3c"); // Red Logout
+        Button btnLogout = createNavButton("Logout", "#34495e"); // Red Logout
         btnLogout.setOnAction(e -> app.showLoginScreen());
 
         // Add buttons to grid
@@ -76,7 +76,7 @@ public class MainLayout extends VBox {
 
         // Admin Only Button
         if (currentUser instanceof Admin) {
-            Button btnUsers = createNavButton("👤 Manage Users", "#8e44ad"); // Purple
+            Button btnUsers = createNavButton("Manage Users", "#34495e"); // Purple
             btnUsers.setOnAction(e -> app.showUserManagement());
             // Span across 2 columns
             navGrid.add(btnUsers, 0, 2, 2, 1);
