@@ -33,13 +33,13 @@ public class DemandView extends VBox {
         colPart.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().getPart().getName()));
 
-        TableColumn<DemandItem, String> colSupplier = new TableColumn<>("Supplier");
+        /*TableColumn<DemandItem, String> colSupplier = new TableColumn<>("Supplier");
         colSupplier.setCellValueFactory(cellData -> {
             if (cellData.getValue().getPart().getSupplier() != null) {
                 return new SimpleStringProperty(cellData.getValue().getPart().getSupplier().getName());
             }
             return new SimpleStringProperty("N/A");
-        });
+        });*/
 
         TableColumn<DemandItem, String> colQty = new TableColumn<>("Qty Needed");
         colQty.setCellValueFactory(cellData ->
@@ -49,7 +49,7 @@ public class DemandView extends VBox {
         colCost.setCellValueFactory(cellData ->
                 new SimpleStringProperty(String.valueOf(cellData.getValue().getTotalCost())));
 
-        table.getColumns().addAll(colPart, colSupplier, colQty, colCost);
+        table.getColumns().addAll(colPart, colQty, colCost);
 
         Button btnRefresh = new Button("Refresh Demands");
         btnRefresh.setStyle("-fx-background-color: red; -fx-text-fill: white;");

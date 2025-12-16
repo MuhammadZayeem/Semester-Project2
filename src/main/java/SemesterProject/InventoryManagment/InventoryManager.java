@@ -4,7 +4,6 @@ import SemesterProject.Part;
 import SemesterProject.DatabaseManager;
 import java.util.ArrayList;
 import java.util.List;
-// SQL Import removed
 
 public class InventoryManager {
 

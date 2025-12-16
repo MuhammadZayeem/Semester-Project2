@@ -1,4 +1,4 @@
-package SemesterProject.Supplier;
+/*package SemesterProject.Supplier;
 
 import SemesterProject.Part;
 
@@ -23,3 +23,4 @@ public class PurchaseRecord {
     public double getPrice() { return price; }
     public Date getDate() { return date; }
 }
+*/

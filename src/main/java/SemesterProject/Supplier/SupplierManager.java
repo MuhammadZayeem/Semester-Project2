@@ -1,4 +1,4 @@
-package SemesterProject.Supplier;
+/*package SemesterProject.Supplier;
 
 import SemesterProject.Part;
 
@@ -60,7 +60,7 @@ public class SupplierManager {
         for (Supplier s : suppliers) {
             s.displaySupplierDetails();
         }
-    }*/
+    }
 
     // -------------------------
     // Assign a Part to a Supplier
@@ -91,3 +91,4 @@ public class SupplierManager {
     }
 
 }
+*/

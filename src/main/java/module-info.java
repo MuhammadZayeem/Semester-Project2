@@ -13,5 +13,5 @@ module com.example.demo { // Keep your project name here (whatever was there bef
     exports SemesterProject.InventoryManagment;
     exports SemesterProject.Login;
     exports SemesterProject.Sales;
-    exports SemesterProject.Supplier;
+    //exports SemesterProject.Supplier;
 }

@@ -1,4 +1,4 @@
-package SemesterProject.Supplier;
+/*package SemesterProject.Supplier;
 
 import SemesterProject.Part;
 
@@ -75,3 +75,4 @@ public abstract class Supplier  {
     public String getAddress() { return address; }
     public String getSpecialization() { return specialization; }
 }
+*/

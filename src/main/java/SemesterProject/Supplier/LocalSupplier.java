@@ -1,4 +1,4 @@
-package SemesterProject.Supplier;
+/*package SemesterProject.Supplier;
 
 import SemesterProject.Part;
 
@@ -9,7 +9,7 @@ public class LocalSupplier extends Supplier {
 
         super(name, contact, email, address, specialization);
     }
-
+*/
    /* @Override
     public void displaySupplierDetails() {
         System.out.println("--------- SUPPLIER DETAILS ---------");
@@ -21,8 +21,8 @@ public class LocalSupplier extends Supplier {
         System.out.println("------------------------------------");
     }*/
 
-    @Override
+  /*  @Override
     public void addSuppliedPart(Part part) {
         super.addSuppliedPart(part);
     }
-}
+}*/

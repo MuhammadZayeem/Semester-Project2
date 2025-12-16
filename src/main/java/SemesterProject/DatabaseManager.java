@@ -4,13 +4,9 @@ import SemesterProject.Login.Admin;
 import SemesterProject.Login.Staff;
 import SemesterProject.Sales.Sale;
 import SemesterProject.Body.*;
-import SemesterProject.Supplier.Supplier;
-import SemesterProject.Supplier.LocalSupplier;
-import SemesterProject.Exception.*; // Import your exceptions
-
+import SemesterProject.Exception.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class DatabaseManager {
 
@@ -58,8 +54,6 @@ public class DatabaseManager {
         }
 
         if (newUser.getUserId() == null) {
-            // Simple ID generation for memory mode
-            // Note: In a real app, use setter. Here we assume object construction logic.
         }
         users.add(newUser);
         System.out.println("User added: " + newUser.getUsername());
