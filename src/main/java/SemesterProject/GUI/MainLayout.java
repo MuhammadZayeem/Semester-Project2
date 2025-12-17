@@ -16,21 +16,20 @@ public class MainLayout {
 
     private GridPane layout;
 
-    // Labels for Data
+    //Labels
     private Label lblTotalStock;
     private Label lblLowStock;
     private Label lblSoldToday;
     private Label lblPendingDemands;
 
     public MainLayout(MainApp app, User currentUser) {
-        // Initialize the layout container as GridPane
         layout = new GridPane();
         layout.setAlignment(Pos.TOP_CENTER);
         layout.setPadding(new Insets(40));
-        layout.setVgap(30); // Spacing between rows (Title, Stats, Menu)
+        layout.setVgap(30);
         layout.setStyle("-fx-background-color: #ecf0f1;");
 
-        // --- 1. HEADER ---
+        // ----HEADER
         Label lblTitle = new Label("IMS SYSTEM - Main Dashboard");
         lblTitle.setFont(Font.font("Arial", FontWeight.BOLD, 32));
         lblTitle.setStyle("-fx-text-fill: #2c3e50;");
@@ -39,7 +38,7 @@ public class MainLayout {
         lblUser.setFont(Font.font("Arial", 16));
         lblUser.setStyle("-fx-text-fill: #7f8c8d;");
 
-        // --- 2. STATS TILES (Nested Grid) ---
+        // --------STATUS TILES
         GridPane statsGrid = new GridPane();
         statsGrid.setHgap(20);
         statsGrid.setVgap(20);
@@ -55,7 +54,7 @@ public class MainLayout {
         statsGrid.add(createStatsTile("Sold Today", lblSoldToday, "#27ae60"), 2, 0);   // Green
         statsGrid.add(createStatsTile("Demands", lblPendingDemands, "#f39c12"), 3, 0); // Orange
 
-        // --- 3. NAVIGATION MENU (Nested Grid) ---
+        // -----------NAVIGATION MENU
         GridPane navGrid = new GridPane();
         navGrid.setHgap(20);
         navGrid.setVgap(20);
@@ -70,7 +69,7 @@ public class MainLayout {
         Button btnDemand = createNavButton(" Demand List", "#34495e");
         btnDemand.setOnAction(e -> app.showDemandList());
 
-        Button btnLogout = createNavButton(" Logout", "#e74c3c");
+        Button btnLogout = createNavButton(" Logout", "34495e");
         btnLogout.setOnAction(e -> app.showLoginScreen());
 
         navGrid.add(btnInventory, 0, 0);
@@ -78,13 +77,13 @@ public class MainLayout {
         navGrid.add(btnDemand, 0, 1);
         navGrid.add(btnLogout, 1, 1);
 
-        if (currentUser instanceof Admin) {
-            Button btnUsers = createNavButton("👤 Manage Users", "#8e44ad");
-            btnUsers.setOnAction(e -> app.showUserManagement());
+ /*       if (currentUser instanceof Admin) {
+           // Button btnUsers = createNavButton("Manage Users", "#8e44ad");
+            //btnUsers.setOnAction(e -> app.showUserManagement());
             // Span across 2 columns
-            navGrid.add(btnUsers, 0, 2, 2, 1);
-            btnUsers.setMaxWidth(Double.MAX_VALUE);
-        }
+            //navGrid.add(btnUsers, 0, 2, 2, 1);
+            //btnUsers.setMaxWidth(Double.MAX_VALUE);
+        }*/
 
         // --- ADDING TO ROOT GRIDPANE ---
         // Row 0: Title
@@ -123,7 +122,8 @@ public class MainLayout {
         tile.setAlignment(Pos.CENTER);
         tile.setPadding(new Insets(15));
         tile.setPrefSize(200, 120);
-        tile.setStyle("-fx-background-color: " + colorHex + "; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 1);");
+        tile.setStyle("-fx-background-color: black;");
+        //tile.setStyle("-fx-background-color: " + colorHex + "; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 1);");
 
         Label lblTitle = new Label(title);
         lblTitle.setFont(Font.font("Arial", 16));
@@ -138,10 +138,10 @@ public class MainLayout {
         Button btn = new Button(text);
         btn.setPrefSize(250, 80);
         btn.setFont(Font.font("Arial", FontWeight.BOLD, 18));
-        btn.setStyle("-fx-background-color: " + colorHex + "; -fx-text-fill: white; -fx-background-radius: 10; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 1);");
+        //btn.setStyle("-fx-background-color: " + colorHex + "; -fx-text-fill: white; -fx-background-radius: 10; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 1);");
 
-        btn.setOnMouseEntered(e -> btn.setStyle("-fx-background-color: derive(" + colorHex + ", -20%); -fx-text-fill: white; -fx-background-radius: 10; -fx-cursor: hand;"));
-        btn.setOnMouseExited(e -> btn.setStyle("-fx-background-color: " + colorHex + "; -fx-text-fill: white; -fx-background-radius: 10; -fx-cursor: hand;"));
+        //btn.setOnMouseEntered(e -> btn.setStyle("-fx-background-color: derive(" + colorHex + ", -20%); -fx-text-fill: white; -fx-background-radius: 10; -fx-cursor: hand;"));
+        //btn.setOnMouseExited(e -> btn.setStyle("-fx-background-color: " + colorHex + "; -fx-text-fill: white; -fx-background-radius: 10; -fx-cursor: hand;"));
 
         return btn;
     }

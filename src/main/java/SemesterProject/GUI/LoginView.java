@@ -16,45 +16,38 @@ public class LoginView {
 
     public LoginView(MainApp app) {
         this.app = app;
-
-        // Initialize Root Layout (GridPane)
         rootLayout = new GridPane();
         rootLayout.setAlignment(Pos.CENTER);
         rootLayout.setPadding(new Insets(40));
-        rootLayout.setVgap(15); // Vertical spacing between rows
+        rootLayout.setVgap(15);
         rootLayout.setHgap(10);
         rootLayout.setStyle("-fx-background-color: #f0f2f5;");
-
-        // Start with Login Form
         showLoginForm();
     }
 
-    // --- Critical Method to return the view to the Scene ---
+    // ------------------------------------------Method to return the view
     public Parent getView() {
         return rootLayout;
     }
 
-    // =================================================================================
-    // FORM BUILDERS
-    // =================================================================================
 
     private void showLoginForm() {
-        rootLayout.getChildren().clear(); // Clear previous view
+        rootLayout.getChildren().clear();
 
         Label title = new Label("System Login");
         title.setFont(Font.font("Arial", FontWeight.BOLD, 24));
 
-        TextField txtUser = new TextField();
-        txtUser.setPromptText("Username");
-        txtUser.setMaxWidth(250);
+        TextField User = new TextField();
+        User.setPromptText("Username");
+        User.setMaxWidth(250);
 
-        PasswordField txtPass = new PasswordField();
-        txtPass.setPromptText("Password");
-        txtPass.setMaxWidth(250);
+        PasswordField Pass = new PasswordField();
+        Pass.setPromptText("Password");
+        Pass.setMaxWidth(250);
 
-        Button btnLogin = new Button("Login");
-        btnLogin.setStyle("-fx-background-color: blue; -fx-text-fill: white; -fx-font-weight: bold;");
-        btnLogin.setPrefWidth(250);
+        Button Login = new Button("Login");
+        Login.setStyle("-fx-background-color: blue; -fx-text-fill: white; -fx-font-weight: bold;");
+        Login.setPrefWidth(250);
 
         Hyperlink linkForgot = new Hyperlink("Forgot Password?");
         linkForgot.setStyle("-fx-font-size: 11px; -fx-text-fill: #3498db;");
@@ -62,9 +55,9 @@ public class LoginView {
         Label lblError = new Label();
         lblError.setStyle("-fx-text-fill: red;");
 
-        // --- Actions ---
-        btnLogin.setOnAction(e -> {
-            boolean success = app.authenticate(txtUser.getText(), txtPass.getText());
+        // -------------------------------------------------------------Login Actions
+        Login.setOnAction(e -> {
+            boolean success = app.authenticate(User.getText(), Pass.getText());
             System.out.println("clicked");
             if (!success) {
                 lblError.setText("Invalid credentials!");
@@ -73,42 +66,41 @@ public class LoginView {
 
         linkForgot.setOnAction(e -> showResetForm());
 
-        // --- Add to Grid (Column 0, Row X) ---
+        // --------------------------------------------Add to Grid
         rootLayout.add(title, 0, 0);
-        rootLayout.add(txtUser, 0, 1);
-        rootLayout.add(txtPass, 0, 2);
-        rootLayout.add(btnLogin, 0, 3);
+        rootLayout.add(User, 0, 1);
+        rootLayout.add(Pass, 0, 2);
+        rootLayout.add(Login, 0, 3);
         rootLayout.add(linkForgot, 0, 4);
         rootLayout.add(lblError, 0, 5);
-
-        // Center Align Everything
+        // Center Align
         for (javafx.scene.Node node : rootLayout.getChildren()) {
             GridPane.setHalignment(node, HPos.CENTER);
         }
     }
 
     private void showResetForm() {
-        rootLayout.getChildren().clear(); // Clear Login view
+        rootLayout.getChildren().clear();
 
         Label title = new Label("Password Reset Request");
         title.setFont(Font.font("Arial", FontWeight.BOLD, 20));
 
-        TextField txtUser = new TextField();
-        txtUser.setPromptText("Enter your Username (Staff Only)");
-        txtUser.setMaxWidth(250);
+        TextField User = new TextField();
+        User.setPromptText("Enter your Username (Staff Only)");
+        User.setMaxWidth(250);
 
-        Button btnRequest = new Button("Request Reset");
-        btnRequest.setStyle("-fx-background-color: blue; -fx-text-fill: white; -fx-font-weight: bold;");
-        btnRequest.setPrefWidth(250);
+        Button Request = new Button("Request Reset");
+        Request.setStyle("-fx-background-color: blue; -fx-text-fill: white; -fx-font-weight: bold;");
+        Request.setPrefWidth(250);
 
-        Hyperlink linkBack = new Hyperlink("Back to Login");
-        linkBack.setStyle("-fx-font-size: 11px; -fx-text-fill: red;");
+        Button Back = new Button("Back to Login");
+        Back.setStyle("-fx-font-size: 11px; -fx-text-fill: red;");
 
         Label lblStatus = new Label();
 
-        // --- Actions ---
-        btnRequest.setOnAction(e -> {
-            String username = txtUser.getText().trim();
+        // ------------------------------------------------------Request Actions
+        Request.setOnAction(e -> {
+            String username = User.getText().trim();
             if (username.isEmpty()) {
                 lblStatus.setStyle("-fx-text-fill: red;");
                 lblStatus.setText("Username cannot be empty.");
@@ -122,19 +114,19 @@ public class LoginView {
                 lblStatus.setStyle("-fx-text-fill: green;");
             }
             lblStatus.setText(resultMessage);
-            txtUser.clear();
+            User.clear();
         });
 
-        linkBack.setOnAction(e -> showLoginForm());
+        Back.setOnAction(e -> showLoginForm());
 
-        // --- Add to Grid ---
+        // --------------------------------------------------------Add to Grid
         rootLayout.add(title, 0, 0);
-        rootLayout.add(txtUser, 0, 1);
-        rootLayout.add(btnRequest, 0, 2);
-        rootLayout.add(linkBack, 0, 3);
+        rootLayout.add(User, 0, 1);
+        rootLayout.add(Request, 0, 2);
+        rootLayout.add(Back, 0, 3);
         rootLayout.add(lblStatus, 0, 4);
 
-        // Center Align Everything
+        // Center Align
         for (javafx.scene.Node node : rootLayout.getChildren()) {
             GridPane.setHalignment(node, HPos.CENTER);
         }

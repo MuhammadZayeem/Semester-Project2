@@ -1,3 +1,4 @@
+/*
 package SemesterProject.GUI;
 
 import SemesterProject.Login.Admin;
@@ -105,9 +106,11 @@ public class UserManagementView extends StackPane {
 
         // --- BACK BUTTON ---
         Button btnBack = new Button("⬅ Back to Dashboard");
+*/
 /*
         btnBack.setStyle("-fx-background-color: transparent; -fx-text-fill: #7f8c8d; -fx-font-size: 14px; -fx-cursor: hand;");
-*/
+*//*
+
         btnBack.setOnAction(e -> app.showMainDashboard());
 
         contentArea.getChildren().addAll(lblTitle, menuGrid, btnBack, lblStatus);
@@ -411,4 +414,4 @@ public class UserManagementView extends StackPane {
             }
         });
     }
-}
+}*/

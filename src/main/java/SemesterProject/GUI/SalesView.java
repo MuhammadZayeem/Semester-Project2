@@ -62,31 +62,29 @@ public class SalesView {
 
         TableColumn<Sale, String> colQuantity = new TableColumn<>("Qty");
         colQuantity.setCellValueFactory(data -> new SimpleStringProperty(String.valueOf(data.getValue().getQuantitySold())));
-        colQuantity.setStyle("-fx-alignment: CENTER;");
 
         TableColumn<Sale, String> colCost = new TableColumn<>("Total Cost");
         colCost.setCellValueFactory(data -> new SimpleStringProperty(String.format("%.2f", data.getValue().getCost())));
-        colCost.setStyle("-fx-alignment: CENTER-RIGHT;");
 
         table.getColumns().addAll(colDate, colPart, colQuantity, colCost);
 
-        // --- ADDING TO GRID ---
+        // ------------------------------------------------ADDING TO GRID
 
-        // Row 0: Back Button (Left Aligned)
+        //Back Button
         layout.add(btnBack, 0, 0);
         GridPane.setHalignment(btnBack, HPos.LEFT);
 
-        // Row 1: Header (Centered)
+        //Header
         layout.add(lblHeader, 0, 1);
         GridPane.setHalignment(lblHeader, HPos.CENTER);
 
-        // Row 2: Table (Fills space)
+        //Table
         layout.add(table, 0, 2);
 
         refreshTable();
     }
 
-    // --- Critical Method to return the view ---
+    // -------------------------Method for return the view
     public GridPane getView() {
         return layout;
     }
