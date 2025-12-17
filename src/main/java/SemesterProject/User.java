@@ -17,6 +17,7 @@ public abstract class User {
     }
 
     public boolean PasswordValidation(String attemptedPassword) {
+
         return this.password.equals(attemptedPassword);
     }
 

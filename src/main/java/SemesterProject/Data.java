@@ -17,11 +17,11 @@ public class Data {
         this.users = new ArrayList<>();
         this.parts = new ArrayList<>();
         this.sales = new ArrayList<>();
-        initializeDefaultUsers();
+        defaultUsers();
 
     }
 
-    private void initializeDefaultUsers() throws UserCreationException {
+    private void defaultUsers() throws UserCreationException {
         try {
             addUser(new Admin("U01", "admin", "123"));
             addUser(new Staff("U02", "staff", "123"));
@@ -60,7 +60,7 @@ public class Data {
         throw new UserNotFoundException("Cannot remove. User not found: " + username);
     }
 
-    public boolean updateUserDetails(String oldUsername, String newUsername, String newFullName) throws UserAlreadyExistsException {
+  /*  public boolean updateUserDetails(String oldUsername, String newUsername, String newFullName) throws UserAlreadyExistsException {
         User u = findUserByUsername(oldUsername);
         if (u == null) return false;
         User check = findUserByUsername(newUsername);
@@ -70,7 +70,7 @@ public class Data {
         u.setUsername(newUsername);
         return true;
     }
-
+*/
     public boolean updatePassword(String username, String newPassword) {
         User u = findUserByUsername(username);
         if (u != null) {
@@ -103,7 +103,8 @@ public class Data {
         return new ArrayList<>(sales);
     }
 
-    public void addSale(Sale sale, String partId, String userId) {
+    public void addSale(Sale sale) {
+
         sales.add(sale);
     }
 }

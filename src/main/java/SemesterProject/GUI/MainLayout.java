@@ -14,7 +14,6 @@ import javafx.scene.text.FontWeight;
 
 public class MainLayout {
 
-    // The main layout container (Now a GridPane)
     private GridPane layout;
 
     // Labels for Data
@@ -46,10 +45,10 @@ public class MainLayout {
         statsGrid.setVgap(20);
         statsGrid.setAlignment(Pos.CENTER);
 
-        lblTotalStock = createDataLabel("0");
-        lblLowStock = createDataLabel("0");
-        lblSoldToday = createDataLabel("0");
-        lblPendingDemands = createDataLabel("0");
+        lblTotalStock = setLabel();
+        lblLowStock =setLabel();
+        lblSoldToday = setLabel();
+        lblPendingDemands = setLabel();
 
         statsGrid.add(createStatsTile("Total Parts", lblTotalStock, "#3498db"), 0, 0); // Blue
         statsGrid.add(createStatsTile("Low Stock", lblLowStock, "#e74c3c"), 1, 0);     // Red
@@ -62,16 +61,16 @@ public class MainLayout {
         navGrid.setVgap(20);
         navGrid.setAlignment(Pos.CENTER);
 
-        Button btnInventory = createNavButton("📦 Inventory", "#34495e");
-        btnInventory.setOnAction(e -> app.showInventoryView());
+        Button btnInventory = createNavButton("Inventory", "#34495e");
+        btnInventory.setOnAction(e -> app.showInventory());
 
-        Button btnSales = createNavButton("💰 Sales History", "#34495e");
+        Button btnSales = createNavButton(" Sales History", "#34495e");
         btnSales.setOnAction(e -> app.showSalesHistory());
 
-        Button btnDemand = createNavButton("📋 Demand List", "#34495e");
+        Button btnDemand = createNavButton(" Demand List", "#34495e");
         btnDemand.setOnAction(e -> app.showDemandList());
 
-        Button btnLogout = createNavButton("🚪 Logout", "#e74c3c");
+        Button btnLogout = createNavButton(" Logout", "#e74c3c");
         btnLogout.setOnAction(e -> app.showLoginScreen());
 
         navGrid.add(btnInventory, 0, 0);
@@ -147,8 +146,8 @@ public class MainLayout {
         return btn;
     }
 
-    private Label createDataLabel(String text) {
-        Label lbl = new Label(text);
+    private Label setLabel() {
+        Label lbl = new Label();
         lbl.setFont(Font.font("Arial", FontWeight.BOLD, 36));
         return lbl;
     }

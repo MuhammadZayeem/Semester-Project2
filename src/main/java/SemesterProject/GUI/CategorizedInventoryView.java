@@ -72,11 +72,10 @@ public class CategorizedInventoryView extends GridPane {
 
         int row = 1;
         for (String type : subTypes) {
-            String displayName = type.replaceAll("(.)([A-Z])", "$1 $2");
-            Button btn = new Button(displayName);
+            Button btn = new Button(type);
             btn.setPrefWidth(300);
             btn.setFont(Font.font(16));
-            btn.setOnAction(e -> showLevel3_PartTable(type, displayName, category));
+            btn.setOnAction(e -> showLevel3_PartTable(type, type, category));
             add(btn, 0, row++);
             setHalignment(btn, javafx.geometry.HPos.CENTER);
         }

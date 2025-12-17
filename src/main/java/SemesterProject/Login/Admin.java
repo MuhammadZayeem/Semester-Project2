@@ -10,8 +10,9 @@ public class Admin extends User {
         super(userId, username, password, UserRoles.ADMIN);
     }
 
-    @Override
-    public String getPassword() {return super.getPassword();}
+    //@Override
+    public String getPassword() {
+        return super.getPassword();}
     public void addUser(User newUser) throws Exception {}
 
     public boolean RemoveUser(MainApp app, String username) throws UserNotFoundException {

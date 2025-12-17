@@ -10,6 +10,7 @@ public class LoginManager {
     private ArrayList<PasswordResetRequest> resetRequests = new ArrayList<>();
 
     public LoginManager(Data data) {
+
         this.data = data;
     }
 
@@ -33,6 +34,7 @@ public class LoginManager {
 
     // --------------------------------------------------------FIND USER
     public User findUser(String username) {
+
         return data.findUserByUsername(username);
     }
 
