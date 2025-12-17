@@ -87,7 +87,7 @@ public class CategorizedInventoryView extends GridPane {
     }
 
     // LEVEL 3: PART TABLE
-    public void showLevel3_PartTable(String rawType, String displayName, String category) {
+    public void showLevel3_PartTable(String Type, String displayName, String category) {
         clearGrid();
 
         Label title = new Label(displayName + " Inventory");
@@ -113,23 +113,23 @@ public class CategorizedInventoryView extends GridPane {
         totalCol.setPrefWidth(150);
 
         table.getColumns().addAll(nameCol, qtyCol, priceCol, totalCol);
-
+//for total quantity and price
         int totalQty = 0;
         double totalValue = 0;
         for (Part p : masterPartList) {
-            if (p.getClass().getSimpleName().equalsIgnoreCase(rawType)) {
+            if (p.getClass().getSimpleName().equalsIgnoreCase(Type)) {
                 table.getItems().add(p);
                 totalQty += p.getCurrentStock();
                 totalValue += p.getCurrentStock() * p.getUnitPrice();
             }
         }
 
-        Label summary = new Label("Total Qty: " + totalQty + " | Total Value: $" + String.format("%.2f", totalValue));
+        Label summary = new Label("Total Qty: " + totalQty + " | Total Value: " + String.format("%.2f", totalValue));
         summary.setFont(Font.font("Arial", FontWeight.BOLD, 16));
 
         table.setRowFactory(tv -> {
             TableRow<Part> row = new TableRow<>();
-            row.setOnMouseClicked(e -> { if (!row.isEmpty()) showQuickStockDialog(row.getItem(), rawType, category); });
+            row.setOnMouseClicked(e -> { if (!row.isEmpty()) showQuickStockDialog(row.getItem(), Type, category); });
             return row;
         });
 
@@ -151,7 +151,7 @@ public class CategorizedInventoryView extends GridPane {
         setHalignment(btnAdd, javafx.geometry.HPos.CENTER);
     }
 
-    // ADD NEW PART (using reflection)
+    // ADD NEW PART
     private void showAddPartDialog(String category) {
         Dialog<Void> dialog = new Dialog<>();
         dialog.setTitle("Add New Part");
@@ -199,7 +199,7 @@ public class CategorizedInventoryView extends GridPane {
                     masterPartList.add(newPart);
 
                     // Refresh table for this exact type
-                    showLevel3_PartTable(type, type.replaceAll("(.)([A-Z])", "$1 $2"), "Body");
+                    showLevel3_PartTable(type, type, "Body");
 
                 } catch (Exception ex){
                     new Alert(Alert.AlertType.ERROR, "Invalid input!").showAndWait();
@@ -243,7 +243,7 @@ public class CategorizedInventoryView extends GridPane {
         dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
         dialog.showAndWait();
 
-        showLevel3_PartTable(rawType, rawType.replaceAll("(.)([A-Z])", "$1 $2"), category);
+        showLevel3_PartTable(rawType, rawType, category);
     }
 
     private Button createMainButton(String text) {

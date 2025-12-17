@@ -65,7 +65,6 @@ public class LoginView {
         // --- Actions ---
         btnLogin.setOnAction(e -> {
             boolean success = app.authenticate(txtUser.getText(), txtPass.getText());
-            System.out.println("clicked");
             if (!success) {
                 lblError.setText("Invalid credentials!");
             }

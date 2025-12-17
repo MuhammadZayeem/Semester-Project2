@@ -69,6 +69,7 @@ public class MainApp extends Application {
     }
 
     private int getRandomStock() {
+
         return new Random().nextInt(46) + 5;
     }
 
