@@ -51,8 +51,8 @@ public class SalesView {
         // 3. Table Setup
         table = new TableView<>();
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        GridPane.setHgrow(table, Priority.ALWAYS); // Ensure table expands horizontally
-        GridPane.setVgrow(table, Priority.ALWAYS); // Ensure table expands vertically
+        GridPane.setHgrow(table, Priority.ALWAYS);
+        GridPane.setVgrow(table, Priority.ALWAYS);
 
         TableColumn<Sale, String> colDate = new TableColumn<>("Date");
         colDate.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getFormattedSaleDate()));
