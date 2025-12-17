@@ -45,7 +45,6 @@ public class LoginManager {
             //no user found
             return;
         }
-
         for (PasswordResetRequest req : resetRequests) {
             if (req.getUsername().equalsIgnoreCase(username)) {
                 //only staff can request

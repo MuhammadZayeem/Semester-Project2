@@ -13,8 +13,6 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import SemesterProject.Demand.DemandManager;
 import SemesterProject.Login.PasswordResetRequest;
-import SemesterProject.Exception.UserAlreadyExistsException;
-import SemesterProject.Exception.UserNotFoundException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +52,7 @@ public class MainApp extends Application {
         masterPartList.addAll(dbManager.getAllParts());
         if (masterPartList.isEmpty()) {
             try {
-                loadMockInventoryAndSaveToDB();
+                loadMockInventoryAndSaveToData();
                 masterPartList.clear();
                 masterPartList.addAll(dbManager.getAllParts());
             } catch (Exception e) {
@@ -73,7 +71,7 @@ public class MainApp extends Application {
         return new Random().nextInt(46) + 5;
     }
 
-    private void loadMockInventoryAndSaveToDB() throws Exception {
+    private void loadMockInventoryAndSaveToData() throws Exception {
         String t = null;
         dbManager.addPart(new FrontLaminatedGlass(t, "Corolla 2000 FLG", "Corolla 2002", getRandomStock(), 5, 18000));
         dbManager.addPart(new FrontGlass(t, "Civic X FG", "Civic X", getRandomStock(), 5, 9500));
@@ -94,7 +92,6 @@ public class MainApp extends Application {
         User authenticatedUser = loginManager.login(username, password);
         if (authenticatedUser != null) {
             this.currentUser = authenticatedUser;
-            // Initialize Dashboard Manager here with the user
             dashboardManager = new DashboardManager(this, currentUser, masterPartList, masterSaleList, demandManager);
             showMainDashboard();
             return true;
@@ -102,9 +99,6 @@ public class MainApp extends Application {
         return false;
     }
 
-    // =================================================================================
-    // NAVIGATION METHODS
-    // =================================================================================
 
     public void showMainDashboard() {
         dashboardManager.updateDashboardData();
@@ -130,39 +124,11 @@ public class MainApp extends Application {
         primaryStage.getScene().setRoot(view.getView());
     }
 
-    public void showUserManagement() {
+/*    public void showUserManagement() {
         UserManagementView view = new UserManagementView(this, currentUser);
         primaryStage.getScene().setRoot(view);
-    }
+    }*/
 
-    // =================================================================================
-    // ACTIONS
-    // =================================================================================
-
-    public void addUserPart(Part newPart) throws Exception {
-        dbManager.addPart(newPart);
-        masterPartList.add(newPart);
-        // Recalculate demands since a new part is added
-        demandManager.addDemands(masterPartList);
-        dashboardManager.updateDashboardData();
-    }
-
-    public void increaseStock(Part part) {
-        try {
-            int newStock = part.getCurrentStock() + 1;
-            part.setCurrentStock(newStock);
-
-            // Note: Since Data class is in-memory, updating the object 'part'
-            // directly updates it in the list. We don't strictly need a dbManager.update()
-            // call unless you add SQL back later.
-            //dbManager.updatePart(part);
-
-            demandManager.addDemands(masterPartList);
-            dashboardManager.updateDashboardData();
-        } catch (Exception e) {
-            System.err.println("Error increasing stock: " + e.getMessage());
-        }
-    }
 
     public void recordSale(Part part) {
         try {
@@ -176,7 +142,6 @@ public class MainApp extends Application {
             masterSaleList.add(newSale);
 
             part.setCurrentStock(newStock);
-            // dbManager.updatePart(part); // Optional for memory-only, good practice
 
             demandManager.addDemands(masterPartList);
             dashboardManager.updateDashboardData();
@@ -203,11 +168,7 @@ public class MainApp extends Application {
         if (currentUser instanceof Admin) return loginManager.approvePasswordReset(currentUser.getUsername(), staff, pass);
         return false;
     }
-    public boolean removeUser(String username) throws UserNotFoundException { return dbManager.removeUser(username); }
- /*   public boolean updateUserDetails(String old, String newU, String newN) throws UserAlreadyExistsException {
-        return dbManager.updateUserDetails(old, newU);
-    }*/
 
-    public static void main(String[] args) { launch(args); }
-    public void addUser(User newUser) {}
+    public static void main(String[] args)
+    { launch(args); }
 }

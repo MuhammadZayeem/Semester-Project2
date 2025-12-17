@@ -17,9 +17,7 @@ import javafx.scene.text.FontWeight;
 
 public class DemandView {
 
-    // The main layout container
     private GridPane layout;
-
     private DemandManager demandManager;
     private MainApp app;
     private TableView<DemandItem> table;
@@ -28,7 +26,6 @@ public class DemandView {
         this.app = app;
         this.demandManager = manager;
 
-        // Initialize Layout (GridPane)
         layout = new GridPane();
         layout.setAlignment(Pos.CENTER);
         layout.setPadding(new Insets(20));
@@ -36,50 +33,50 @@ public class DemandView {
         layout.setHgap(10);
         layout.setStyle("-fx-background-color: #ecf0f1;");
 
-        // 1. Back Button
-        Button btnBack = new Button("⬅ Back to Dashboard");
+        //----------Back Button
+        Button btnBack = new Button("Back to Dashboard");
         btnBack.setStyle("-fx-background-color: transparent; -fx-text-fill: #7f8c8d; -fx-font-size: 14px; -fx-cursor: hand;");
         btnBack.setOnAction(e -> app.showMainDashboard());
 
-        // 2. Header
+        //----------------Header
         Label lblHeader = new Label("Demand List");
         lblHeader.setFont(Font.font("Arial", FontWeight.BOLD, 22));
         lblHeader.setStyle("-fx-text-fill: #2c3e50;");
 
-        // 3. Table Setup
+        //--------------------Table Setup
         table = new TableView<>();
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        GridPane.setHgrow(table, Priority.ALWAYS); // Ensure table expands horizontally
-        GridPane.setVgrow(table, Priority.ALWAYS); // Ensure table expands vertically
+        GridPane.setHgrow(table, Priority.ALWAYS);
+        GridPane.setVgrow(table, Priority.ALWAYS);
 
         TableColumn<DemandItem, String> colPart = new TableColumn<>("Part Name");
-        colPart.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getPart().getName()));
+        colPart.setCellValueFactory(e -> new SimpleStringProperty(e.getValue().getPart().getName()));
 
         TableColumn<DemandItem, String> colQty = new TableColumn<>("Qty Needed");
-        colQty.setCellValueFactory(cell -> new SimpleStringProperty(String.valueOf(cell.getValue().getQuantityNeeded())));
+        colQty.setCellValueFactory(e -> new SimpleStringProperty(String.valueOf(e.getValue().getQuantityNeeded())));
 
         table.getColumns().addAll(colPart, colQty);
 
-        // Load Data
+        //---------------------Load Data
         if (demandManager.getDemandList() != null) {
             table.getItems().setAll(demandManager.getDemandList());
         }
 
-        // --- ADDING TO GRID ---
+        // ------------------------------ADDING TO GRID
 
-        // Row 0: Back Button (Left Aligned)
+        //Back Button
         layout.add(btnBack, 0, 0);
         GridPane.setHalignment(btnBack, HPos.LEFT);
 
-        // Row 1: Header (Centered)
+        //Header
         layout.add(lblHeader, 0, 1);
         GridPane.setHalignment(lblHeader, HPos.CENTER);
 
-        // Row 2: Table (Fills space)
+        //Table
         layout.add(table, 0, 2);
     }
 
-    // --- Critical Method to return the view ---
+    // -------------------Method to return view
     public GridPane getView() {
         return layout;
     }
