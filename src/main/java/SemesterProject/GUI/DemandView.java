@@ -35,7 +35,7 @@ public class DemandView {
 
         //----------Back Button
         Button btnBack = new Button("Back to Dashboard");
-        btnBack.setStyle("-fx-background-color: transparent; -fx-text-fill: #7f8c8d; -fx-font-size: 14px; -fx-cursor: hand;");
+        //btnBack.setStyle("-fx-background-color: transparent; -fx-text-fill: #7f8c8d; -fx-font-size: 14px; -fx-cursor: hand;");
         btnBack.setOnAction(e -> app.showMainDashboard());
 
         //----------------Header
