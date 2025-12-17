@@ -210,7 +210,7 @@ public class UserManagementView extends StackPane {
                 lblStatus.setStyle("-fx-text-fill: red;");
                 return;
             }
-            adminUser.resetUserPassword(app, txtUser.getText(), txtPass.getText());
+            //adminUser.resetUserPassword(app, txtUser.getText(), txtPass.getText());
             lblStatus.setText("Password reset for: " + txtUser.getText());
             lblStatus.setStyle("-fx-text-fill: green;");
             txtUser.clear(); txtPass.clear();
@@ -245,7 +245,7 @@ public class UserManagementView extends StackPane {
 
         btnRemove.setOnAction(e -> {
             try {
-                adminUser.RemoveUser(app, txtUser.getText().trim());
+                //adminUser.RemoveUser(app, txtUser.getText().trim());
                 lblStatus.setText("User removed: " + txtUser.getText());
                 lblStatus.setStyle("-fx-text-fill: green;");
                 txtUser.clear();

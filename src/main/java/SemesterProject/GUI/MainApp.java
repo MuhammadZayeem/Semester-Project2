@@ -113,7 +113,7 @@ public class MainApp extends Application {
         primaryStage.centerOnScreen();
     }
 
-    public void showInventoryView() {
+    public void showInventory() {
         CategorizedInventoryView view = new CategorizedInventoryView(masterPartList, this);
         primaryStage.getScene().setRoot(view);
     }
@@ -171,7 +171,7 @@ public class MainApp extends Application {
             String userId = currentUser != null ? currentUser.getUserId() : "U00";
             Sale newSale = new Sale(part.getName(), 1, part.getUnitPrice());
 
-            dbManager.addSale(newSale, part.getPartId(), userId);
+            dbManager.addSale(newSale);
             masterSaleList.add(newSale);
 
             part.setCurrentStock(newStock);
